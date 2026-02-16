@@ -1,0 +1,6 @@
+stable_code,domain_tag,stem_text,response_type,option_a,option_b,order_index,version
+Q1,Test,This statement is clear and easy to understand.,LIKERT_5,,,1,1
+Q2,Test,The rating scale is appropriate for this study.,LIKERT_5,,,2,1
+Q3,Test,This item should be included in the final consensus set.,LIKERT_5,,,3,1
+Q4,Test,Should this item be revised before Round 2?,EITHER_OR,Yes,No,4,1
+Q5,Test,Are you comfortable participating in a 2-round Delphi process?,EITHER_OR,Yes,No,5,1

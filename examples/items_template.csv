@@ -1,0 +1,3 @@
+stable_code,domain_tag,stem_text,response_type,option_a,option_b,order_index,version
+Q1,Patient selection,Example statement text,LIKERT_5,,,1,1
+Q2,Intervention,Choose A or B?,EITHER_OR,Option A label,Option B label,2,1

@@ -1,0 +1,31 @@
+{% extends 'delphi/base.html' %}
+{% block content %}
+  <div class="card">
+    <h2>Round {{ round.number }}{% if round.name %}: {{ round.name }}{% endif %}</h2>
+    <p class="muted">
+      Status: {% if round.is_open %}<span class="badge ok">Open</span>{% elif round.status == 'CLOSED' %}<span class="badge">Closed</span>{% else %}<span class="badge warn">Draft</span>{% endif %}
+      &nbsp; | &nbsp;
+      Completed: {{ done_count }}/{{ total }}
+    </p>
+    {% if not round.is_open %}
+      <p class="badge warn">This round is not currently open for edits.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Items</h3>
+    <table>
+      <thead><tr><th>Code</th><th>Domain</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for x in items %}
+          <tr>
+            <td>{{ x.item.stable_code }}</td>
+            <td class="small">{{ x.item.domain_tag|default:"—" }}</td>
+            <td>{% if x.is_done %}<span class="badge ok">Answered</span>{% else %}<span class="badge warn">Pending</span>{% endif %}</td>
+            <td><a class="btn btn-primary" href="{% url 'delphi:item_detail' x.round_item.id %}">View</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

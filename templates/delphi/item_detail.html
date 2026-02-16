@@ -1,0 +1,59 @@
+{% extends 'delphi/base.html' %}
+{% block content %}
+  <div class="card">
+    <div class="muted small">Round {{ round.number }}{% if round.name %}: {{ round.name }}{% endif %}</div>
+    <h2>{{ item.stable_code }}</h2>
+    <p>{{ item.stem_text }}</p>
+    {% if item.domain_tag %}<p class="muted small">Domain: {{ item.domain_tag }}</p>{% endif %}
+  </div>
+
+  {% if prior %}
+    <div class="card">
+      <h3>Your prior-round response</h3>
+      <p class="muted small">Displayed to support iterative consensus building.</p>
+      {% if prior.likert_value %}<div>Prior Likert: <b>{{ prior.likert_value }}</b></div>{% endif %}
+      {% if prior.either_or_value %}<div>Prior Choice: <b>{{ prior.either_or_value }}</b></div>{% endif %}
+      {% if prior.comment %}<div class="muted small">Prior comment: {{ prior.comment }}</div>{% endif %}
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <h3>Your response</h3>
+    {% if not round.is_open %}
+      <p class="badge warn">This round is closed; responses cannot be edited.</p>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      {% if round.is_open %}
+        <button class="btn btn-primary" type="submit">Save</button>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Group feedback</h3>
+    {% if not feedback_allowed %}
+      <p class="muted small">Per protocol, group feedback is shown only after your first submission in this round.</p>
+    {% else %}
+      {% if feedback %}
+        <p class="muted small">n={{ feedback.n }}{% if feedback.mean %}, mean={{ feedback.mean|floatformat:2 }}{% endif %}</p>
+        {% if feedback.pct_agree is not None %}
+          <div>Agreement (top-box): <b>{{ feedback.pct_agree|floatformat:2 }}</b> (threshold 0.75)</div>
+        {% endif %}
+        {% if feedback.pct_disagree is not None %}
+          <div>Disagreement (bottom-box): <b>{{ feedback.pct_disagree|floatformat:2 }}</b> (threshold 0.75)</div>
+        {% endif %}
+        <div>Consensus reached: <b>{{ feedback.consensus }}</b></div>
+        <h4>Distribution</h4>
+        <pre class="small">{{ feedback.distribution_json }}</pre>
+      {% else %}
+        <p class="muted">No feedback available yet.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <a class="btn" href="{% url 'delphi:round_overview' round.id %}">Back to round</a>
+  </div>
+{% endblock %}
