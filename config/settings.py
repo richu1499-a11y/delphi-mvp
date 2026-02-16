@@ -1,3 +1,7 @@
+
+import os
+import dj_database_url
+
 """
 Django settings for config project.
 
@@ -19,13 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-48^3nqf&phld4fm)%e1)vdh$v(tpr@wo!y-dczh+k#_k&4s$al'
+# --- Render / production-safe settings ---
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-me")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG off by default (turn on locally only if you explicitly set DJANGO_DEBUG=1)
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = ['*']
+# Comma-separated hosts (default includes Render + local)
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "delphi-mvp.onrender.com,localhost,127.0.0.1"
+).split(",")
+
+# Needed so POSTs work cleanly on your Render domain
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS",
+    "https://delphi-mvp.onrender.com"
+).split(",")
 
 
 # Application definition
