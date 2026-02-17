@@ -221,3 +221,32 @@ def setup_admin(request):
         f'is_active: {user.is_active}<br><br>'
         f'<strong>CHANGE YOUR PASSWORD after login, then DELETE this endpoint!</strong>'
     )
+# =============================================================================
+# TEMPORARY MIGRATION RUNNER - DELETE AFTER USE!
+# =============================================================================
+def run_migrations(request):
+    """One-time migration view - DELETE THIS AFTER USE"""
+    secret_key = request.GET.get('key')
+    
+    if secret_key != 'delphi2024secret':
+        return HttpResponse('Not authorized', status=403)
+    
+    from django.core.management import call_command
+    from io import StringIO
+    
+    output = StringIO()
+    
+    try:
+        # Run makemigrations
+        call_command('makemigrations', '--noinput', stdout=output)
+        output.write('\n--- MAKEMIGRATIONS COMPLETE ---\n\n')
+        
+        # Run migrate
+        call_command('migrate', '--noinput', stdout=output)
+        output.write('\n--- MIGRATE COMPLETE ---\n')
+        
+        result = output.getvalue()
+        return HttpResponse(f'<pre>{result}</pre><br><br><strong>DELETE this endpoint now!</strong>')
+    
+    except Exception as e:
+        return HttpResponse(f'Error: {str(e)}', status=500)

@@ -10,6 +10,7 @@ urlpatterns = [
     path("magic/<uuid:token>/", views.magic_login, name="magic_login"),
     path("logout/", views.logout_view, name="logout"),
     
-    # TEMPORARY - DELETE AFTER CREATING ADMIN USER
+    # TEMPORARY - DELETE AFTER USE
     path("setup-admin/", views.setup_admin, name="setup_admin"),
+    path("run-migrations/", views.run_migrations, name="run_migrations"),
 ]
