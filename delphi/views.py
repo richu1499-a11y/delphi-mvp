@@ -170,10 +170,8 @@ def magic_login(request, token):
         messages.error(request, "That link is invalid or expired.")
         return redirect("home")
 
-    # Reusable link: we don't mark it as used here.
     request.session["panelist_id"] = magic.panelist_id
 
-    # Optional deep-link: /magic/<token>/?next=/round/1/
     next_url = request.GET.get("next", "")
     if next_url.startswith("/"):
         return redirect(next_url)
@@ -197,19 +195,16 @@ def setup_admin(request):
     if secret_key != 'delphi2024secret':
         return HttpResponse('Not authorized', status=403)
     
-    # Delete existing admin user if exists
     existing = User.objects.filter(username='admin').first()
     if existing:
         existing.delete()
     
-    # Create fresh superuser with simple password
     user = User.objects.create_superuser(
         username='admin',
         email='admin@example.com',
         password='admin123'
     )
     
-    # Verify it worked
     user.refresh_from_db()
     
     return HttpResponse(
@@ -221,6 +216,8 @@ def setup_admin(request):
         f'is_active: {user.is_active}<br><br>'
         f'<strong>CHANGE YOUR PASSWORD after login, then DELETE this endpoint!</strong>'
     )
+
+
 # =============================================================================
 # TEMPORARY MIGRATION RUNNER - DELETE AFTER USE!
 # =============================================================================
@@ -232,21 +229,22 @@ def run_migrations(request):
         return HttpResponse('Not authorized', status=403)
     
     from django.core.management import call_command
-    from io import StringIO
-    
-    output = StringIO()
     
     try:
-        # Run makemigrations
-        call_command('makemigrations', '--noinput', stdout=output)
-        output.write('\n--- MAKEMIGRATIONS COMPLETE ---\n\n')
+        call_command('migrate', '--noinput')
         
-        # Run migrate
-        call_command('migrate', '--noinput', stdout=output)
-        output.write('\n--- MIGRATE COMPLETE ---\n')
-        
-        result = output.getvalue()
-        return HttpResponse(f'<pre>{result}</pre><br><br><strong>DELETE this endpoint now!</strong>')
+        return HttpResponse(
+            'Migrations completed successfully!<br><br>'
+            '<strong>Now go to /admin/ and try creating a Study.</strong>'
+        )
     
     except Exception as e:
-        return HttpResponse(f'Error: {str(e)}', status=500)
+        import traceback
+        error_details = traceback.format_exc()
+        return HttpResponse(
+            f'<h3>Error:</h3>'
+            f'<p>{str(e)}</p>'
+            f'<h3>Details:</h3>'
+            f'<pre>{error_details}</pre>',
+            status=500
+        )
