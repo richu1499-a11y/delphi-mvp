@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-
+from django.http import HttpResponse
+from django.contrib.auth.models import User
 
 from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission
 
@@ -186,3 +187,37 @@ def logout_view(request):
     return redirect("home")
 
 
+# =============================================================================
+# TEMPORARY ADMIN SETUP - DELETE AFTER USE!
+# =============================================================================
+def setup_admin(request):
+    """One-time setup view to create admin user - DELETE THIS AFTER USE"""
+    secret_key = request.GET.get('key')
+    
+    if secret_key != 'delphi2024secret':
+        return HttpResponse('Not authorized', status=403)
+    
+    # Delete existing admin user if exists
+    existing = User.objects.filter(username='admin').first()
+    if existing:
+        existing.delete()
+    
+    # Create fresh superuser with simple password
+    user = User.objects.create_superuser(
+        username='admin',
+        email='admin@example.com',
+        password='admin123'
+    )
+    
+    # Verify it worked
+    user.refresh_from_db()
+    
+    return HttpResponse(
+        f'Admin user created!<br><br>'
+        f'Username: admin<br>'
+        f'Password: admin123<br><br>'
+        f'is_staff: {user.is_staff}<br>'
+        f'is_superuser: {user.is_superuser}<br>'
+        f'is_active: {user.is_active}<br><br>'
+        f'<strong>CHANGE YOUR PASSWORD after login, then DELETE this endpoint!</strong>'
+    )
