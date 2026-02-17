@@ -228,14 +228,37 @@ def run_migrations(request):
     if secret_key != 'delphi2024secret':
         return HttpResponse('Not authorized', status=403)
     
+    import os
+    from django.conf import settings
     from django.core.management import call_command
     
+    output_messages = []
+    
     try:
-        call_command('migrate', '--noinput')
+        # Step 1: Delete the old database file
+        db_path = settings.DATABASES['default']['NAME']
+        if os.path.exists(db_path):
+            os.remove(db_path)
+            output_messages.append(f"Deleted old database: {db_path}")
+        else:
+            output_messages.append(f"No existing database found at: {db_path}")
         
+        # Step 2: Run migrations to create fresh tables
+        call_command('migrate', '--noinput')
+        output_messages.append("Migrations completed successfully!")
+        
+        # Step 3: Create admin user
+        User.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='admin123'
+        )
+        output_messages.append("Admin user created (admin / admin123)")
+        
+        result = "<br>".join(output_messages)
         return HttpResponse(
-            'Migrations completed successfully!<br><br>'
-            '<strong>Now go to /admin/ and try creating a Study.</strong>'
+            f'{result}<br><br>'
+            f'<strong>Database reset complete! Now go to /admin/ and login.</strong>'
         )
     
     except Exception as e:
