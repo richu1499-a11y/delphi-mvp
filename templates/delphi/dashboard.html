@@ -1,17 +1,82 @@
 {% extends "delphi/base.html" %}
-{% block content %}
-<h2>{{ study.name }}</h2>
-<p>Welcome, {{ panelist.name|default:panelist.email }}.</p>
 
-<h3>Open rounds</h3>
-<ul>
-  {% for row in rounds %}
-    <li>
-      <a href="{% url 'round_overview' row.round.id %}">{{ row.round }}</a>
-      {% if row.is_submitted %} — <em>submitted</em>{% endif %}
-    </li>
-  {% empty %}
-    <li>No open rounds currently.</li>
-  {% endfor %}
-</ul>
+{% block title %}Dashboard — {{ study.name }}{% endblock %}
+
+{% block content %}
+<!-- Welcome Header -->
+<div class="card mb-4">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <div class="icon-circle icon-circle-primary me-3" style="background-color: rgba(255,255,255,0.2);">
+        <i class="bi bi-journal-text text-white"></i>
+      </div>
+      <div>
+        <h4 class="mb-1">{{ study.name }}</h4>
+        <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Expert Consensus Study</p>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="d-flex align-items-center">
+      <div class="icon-circle icon-circle-success me-3">
+        <i class="bi bi-person-check"></i>
+      </div>
+      <div>
+        <p class="mb-0 text-muted small">Logged in as</p>
+        <p class="mb-0 fw-semibold">{{ panelist.name|default:panelist.email }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rounds Section -->
+<div class="card">
+  <div class="card-header">
+    <h4><i class="bi bi-list-check me-2"></i>Survey Rounds</h4>
+  </div>
+  <div class="card-body">
+    {% if rounds %}
+      <div class="list-group list-group-flush">
+        {% for row in rounds %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <div class="icon-circle {% if row.is_submitted %}icon-circle-success{% else %}icon-circle-warning{% endif %} me-3">
+                <i class="bi bi-{% if row.is_submitted %}check-lg{% else %}pencil{% endif %}"></i>
+              </div>
+              <div>
+                <h5 class="mb-1 fw-semibold">{{ row.round }}</h5>
+                <p class="mb-0 text-muted small">
+                  {% if row.is_submitted %}
+                    <span class="badge badge-status badge-submitted">
+                      <i class="bi bi-check-circle me-1"></i>Submitted
+                    </span>
+                  {% else %}
+                    <span class="badge badge-status badge-pending">
+                      <i class="bi bi-clock me-1"></i>In Progress
+                    </span>
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+            <a href="{% url 'round_overview' row.round.id %}" class="btn {% if row.is_submitted %}btn-outline-primary{% else %}btn-primary{% endif %}">
+              {% if row.is_submitted %}
+                <i class="bi bi-eye me-1"></i>View
+              {% else %}
+                <i class="bi bi-arrow-right me-1"></i>Continue
+              {% endif %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <div class="icon-circle icon-circle-primary mx-auto mb-3" style="width: 4rem; height: 4rem; font-size: 1.5rem;">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h5 class="text-muted">No Open Rounds</h5>
+        <p class="text-muted mb-0">There are no survey rounds available at this time. Please check back later.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

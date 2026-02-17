@@ -1,49 +1,138 @@
 {% extends "delphi/base.html" %}
-{% block content %}
-<h2>Item (Round {{ round_item.round.number }})</h2>
-<p>{{ round_item.item.prompt }}</p>
 
-{% if locked %}
-  <div style="padding:10px; border:1px solid #ccc; background:#f7f7f7; margin:10px 0;">
-    <strong>Submitted.</strong> This round is locked; you can view but not edit.
+{% block title %}Item — Round {{ round_item.round.number }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'round_overview' round_item.round.id %}">Round {{ round_item.round.number }}</a></li>
+    <li class="breadcrumb-item active">Item</li>
+  </ol>
+</nav>
+
+<!-- Item Card -->
+<div class="card mb-4">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <div class="icon-circle me-3" style="background-color: rgba(255,255,255,0.2);">
+        <i class="bi bi-question-circle text-white"></i>
+      </div>
+      <div>
+        <h4 class="mb-0">Survey Item</h4>
+        <p class="mb-0 opacity-75 small">Round {{ round_item.round.number }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="bg-light rounded-3 p-4 mb-4">
+      <p class="lead mb-0">{{ round_item.item.prompt }}</p>
+    </div>
+    
+    {% if locked %}
+      <div class="alert alert-success d-flex align-items-center">
+        <i class="bi bi-lock me-2"></i>
+        <div>
+          <strong>Round Submitted</strong> — This round is locked. You can view but not edit your response.
+        </div>
+      </div>
+    {% endif %}
+    
+    {% if response %}
+      <div class="d-flex align-items-center mb-4">
+        <div class="icon-circle icon-circle-success me-3">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <div>
+          <p class="text-muted small mb-0">Your current response</p>
+          <p class="fw-semibold mb-0 fs-5">{{ response.value }}</p>
+        </div>
+      </div>
+    {% endif %}
+    
+    {% if not locked %}
+      <form method="post">
+        {% csrf_token %}
+        
+        {% if round_item.item.item_type == 'likert5' %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Select your rating (1-5)</label>
+            <div class="d-flex gap-2 flex-wrap">
+              {% for i in "12345" %}
+                <div class="form-check form-check-inline">
+                  <input class="btn-check" type="radio" name="value" id="rating{{ i }}" value="{{ i }}" {% if response and response.value == i %}checked{% endif %} required>
+                  <label class="btn btn-outline-primary btn-lg px-4" for="rating{{ i }}">{{ i }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="d-flex justify-content-between text-muted small mt-2" style="max-width: 320px;">
+              <span>Strongly Disagree</span>
+              <span>Strongly Agree</span>
+            </div>
+          </div>
+        {% elif round_item.item.item_type == 'yesno' %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Select your answer</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="btn-check" type="radio" name="value" id="yes" value="yes" {% if response and response.value == "yes" %}checked{% endif %} required>
+                <label class="btn btn-outline-success btn-lg px-5" for="yes">
+                  <i class="bi bi-check-lg me-2"></i>Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="btn-check" type="radio" name="value" id="no" value="no" {% if response and response.value == "no" %}checked{% endif %} required>
+                <label class="btn btn-outline-danger btn-lg px-5" for="no">
+                  <i class="bi bi-x-lg me-2"></i>No
+                </label>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Your answer</label>
+            <textarea name="value" class="form-control" rows="5" placeholder="Enter your response here..." required>{% if response %}{{ response.value }}{% endif %}</textarea>
+          </div>
+        {% endif %}
+        
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-lg me-2"></i>Save Response
+          </button>
+          <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-secondary btn-lg">
+            Cancel
+          </a>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Feedback Section -->
+{% if feedback_allowed and aggregate and round_item.item.item_type == 'likert5' %}
+  <div class="card">
+    <div class="card-header" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+      <h4 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Group Feedback</h4>
+    </div>
+    <div class="card-body">
+      <div class="d-flex align-items-center">
+        <div class="icon-circle icon-circle-success me-3" style="width: 4rem; height: 4rem; font-size: 1.25rem;">
+          <i class="bi bi-people"></i>
+        </div>
+        <div>
+          <p class="text-muted small mb-0">Average Rating (Mean)</p>
+          <p class="display-6 fw-bold mb-0 text-success">{{ aggregate.mean|floatformat:2 }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 {% endif %}
 
-{% if response %}
-  <p><strong>Your response:</strong> {{ response.value }}</p>
-{% endif %}
-
-{% if not locked %}
-  <form method="post">
-    {% csrf_token %}
-    {% if round_item.item.item_type == 'likert5' %}
-      <label>Choose 1-5:</label>
-      <select name="value" required>
-        <option value="">--</option>
-        {% for i in "12345" %}
-          <option value="{{ i }}" {% if response and response.value == i %}selected{% endif %}>{{ i }}</option>
-        {% endfor %}
-      </select>
-    {% elif round_item.item.item_type == 'yesno' %}
-      <label>Yes/No:</label>
-      <select name="value" required>
-        <option value="">--</option>
-        <option value="yes" {% if response and response.value == "yes" %}selected{% endif %}>Yes</option>
-        <option value="no" {% if response and response.value == "no" %}selected{% endif %}>No</option>
-      </select>
-    {% else %}
-      <label>Your answer:</label>
-      <textarea name="value" rows="4" cols="60" required>{% if response %}{{ response.value }}{% endif %}</textarea>
-    {% endif %}
-    <button type="submit">Save response</button>
-  </form>
-{% endif %}
-
-{% if feedback_allowed and aggregate and round_item.item.item_type == 'likert5' %}
-  <hr>
-  <h3>Group feedback (mean)</h3>
-  <p>{{ aggregate.mean|floatformat:2 }}</p>
-{% endif %}
-
-<p><a href="{% url 'round_overview' round_item.round.id %}">Back to Round</a></p>
+<!-- Back Button -->
+<div class="mt-4">
+  <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-primary">
+    <i class="bi bi-arrow-left me-2"></i>Back to Round Overview
+  </a>
+</div>
 {% endblock %}

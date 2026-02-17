@@ -1,55 +1,140 @@
 {% extends "delphi/base.html" %}
-{% block content %}
-<h2>{{ round }}</h2>
 
+{% block title %}{{ round }} — Delphi Study{% endblock %}
+
+{% block content %}
+<!-- Round Header -->
+<div class="card mb-4">
+  <div class="card-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <div class="icon-circle me-3" style="background-color: rgba(255,255,255,0.2);">
+          <i class="bi bi-list-task text-white"></i>
+        </div>
+        <div>
+          <h4 class="mb-0">{{ round }}</h4>
+        </div>
+      </div>
+      <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Status Card -->
 {% if submitted %}
-  <div style="padding:10px; border:1px solid #ccc; background:#f7f7f7; margin:10px 0;">
-    <strong>Submitted.</strong> Your responses for this round are locked.
-    <div style="font-size: 0.9em; color:#555;">Submitted at: {{ submitted.submitted_at }}</div>
+  <div class="alert alert-success d-flex align-items-center" role="alert">
+    <div class="icon-circle icon-circle-success me-3">
+      <i class="bi bi-check-lg"></i>
+    </div>
+    <div>
+      <strong>Round Submitted</strong>
+      <p class="mb-0 small">Your responses have been recorded and locked. Submitted on {{ submitted.submitted_at|date:"F j, Y, g:i a" }}</p>
+    </div>
   </div>
 {% else %}
-  <div style="padding:10px; border:1px solid #e0e0e0; background:#fafafa; margin:10px 0;">
-    Answered: <strong>{{ answered }}/{{ total }}</strong>.
-    When you’re ready, click <strong>Submit Round</strong> to lock your answers.
+  <div class="progress-info">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="fw-semibold">Progress</span>
+      <span class="badge bg-primary">{{ answered }} of {{ total }} completed</span>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: {% widthratio answered total 100 %}%"></div>
+    </div>
+    <p class="text-muted small mt-2 mb-0">
+      <i class="bi bi-info-circle me-1"></i>
+      Complete all items to submit this round
+    </p>
   </div>
 {% endif %}
 
-<ul>
-  {% for row in rows %}
-    {% with ri=row.ri resp=row.response %}
-      <li style="margin: 8px 0;">
-        <div><strong>Item {{ forloop.counter }}:</strong> {{ ri.item.prompt }}</div>
-
-        {% if resp %}
-          <div><em>Your response:</em> {{ resp.value }}</div>
-          <div>
-            <a href="{% url 'item_detail' ri.id %}">
-              {% if submitted %}View{% else %}Edit{% endif %}
-            </a>
-          </div>
-        {% else %}
-          <div><em>No response yet.</em></div>
-          <div><a href="{% url 'item_detail' ri.id %}">Answer</a></div>
-        {% endif %}
-      </li>
-    {% endwith %}
-  {% empty %}
-    <li>No items assigned to this round yet.</li>
-  {% endfor %}
-</ul>
-
-{% if not submitted %}
-  <hr>
-  <form method="post" action="{% url 'submit_round' round.id %}">
-    {% csrf_token %}
-    <button type="submit" {% if not can_submit %}disabled{% endif %}>
-      Submit Round
-    </button>
-    {% if not can_submit %}
-      <div style="font-size:0.9em; color:#777; margin-top:6px;">
-        You must answer all items ({{ answered }}/{{ total }}) before submitting.
+<!-- Items List -->
+<div class="card">
+  <div class="card-header">
+    <h4 class="mb-0"><i class="bi bi-question-circle me-2"></i>Survey Items</h4>
+  </div>
+  <div class="card-body">
+    {% if rows %}
+      <div class="list-group list-group-flush">
+        {% for row in rows %}
+          {% with ri=row.ri resp=row.response %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex">
+                  <div class="icon-circle {% if resp %}icon-circle-success{% else %}icon-circle-warning{% endif %} me-3 flex-shrink-0" style="width: 2.5rem; height: 2.5rem; font-size: 0.875rem;">
+                    {% if resp %}
+                      <i class="bi bi-check-lg"></i>
+                    {% else %}
+                      <span>{{ forloop.counter }}</span>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <h6 class="fw-semibold mb-2">Item {{ forloop.counter }}</h6>
+                    <p class="mb-2 text-muted">{{ ri.item.prompt }}</p>
+                    {% if resp %}
+                      <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-1">
+                        <i class="bi bi-chat-square-text me-2 text-primary"></i>
+                        <span class="small fw-medium">Your response: <strong>{{ resp.value }}</strong></span>
+                      </div>
+                    {% else %}
+                      <span class="badge badge-status badge-pending">
+                        <i class="bi bi-clock me-1"></i>Not answered
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+                <a href="{% url 'item_detail' ri.id %}" class="btn {% if resp %}btn-outline-primary{% else %}btn-primary{% endif %} btn-sm flex-shrink-0 ms-3">
+                  {% if submitted %}
+                    <i class="bi bi-eye me-1"></i>View
+                  {% elif resp %}
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  {% else %}
+                    <i class="bi bi-arrow-right me-1"></i>Answer
+                  {% endif %}
+                </a>
+              </div>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <div class="icon-circle icon-circle-primary mx-auto mb-3">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h5 class="text-muted">No Items</h5>
+        <p class="text-muted mb-0">No items have been assigned to this round yet.</p>
       </div>
     {% endif %}
-  </form>
+  </div>
+</div>
+
+<!-- Submit Button -->
+{% if not submitted %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <form method="post" action="{% url 'submit_round' round.id %}">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-1">Ready to Submit?</h5>
+            <p class="text-muted mb-0 small">
+              {% if can_submit %}
+                <i class="bi bi-check-circle text-success me-1"></i>
+                All items completed. You can now submit this round.
+              {% else %}
+                <i class="bi bi-exclamation-circle text-warning me-1"></i>
+                Please answer all items ({{ answered }}/{{ total }}) before submitting.
+              {% endif %}
+            </p>
+          </div>
+          <button type="submit" class="btn btn-success btn-lg" {% if not can_submit %}disabled{% endif %}>
+            <i class="bi bi-send me-2"></i>Submit Round
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 {% endif %}
 {% endblock %}
