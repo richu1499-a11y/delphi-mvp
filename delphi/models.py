@@ -29,17 +29,41 @@ class Round(models.Model):
 
 class Item(models.Model):
     SCALE_CHOICES = [
-        ("likert5", "Likert 1–5"),
+        ("likert5", "Likert 1–5 (Strongly Disagree to Strongly Agree)"),
         ("yesno", "Yes/No"),
+        ("multiple", "Multiple Choice (Custom Options)"),
         ("text", "Free text"),
     ]
     study = models.ForeignKey(Study, on_delete=models.CASCADE, related_name="items")
-    prompt = models.TextField()
+    prompt = models.TextField(help_text="The question or statement to present to panelists")
     item_type = models.CharField(max_length=20, choices=SCALE_CHOICES, default="likert5")
+    
+    # Custom options for multiple choice questions
+    option_a = models.CharField(max_length=255, blank=True, help_text="Option A (for multiple choice)")
+    option_b = models.CharField(max_length=255, blank=True, help_text="Option B (for multiple choice)")
+    option_c = models.CharField(max_length=255, blank=True, help_text="Option C (for multiple choice)")
+    option_d = models.CharField(max_length=255, blank=True, help_text="Option D (for multiple choice)")
+    option_e = models.CharField(max_length=255, blank=True, help_text="Option E (for multiple choice)")
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"[{self.study.name}] {self.prompt[:50]}..."
+    
+    def get_options(self):
+        """Returns a list of non-empty options for multiple choice questions."""
+        options = []
+        if self.option_a:
+            options.append(('A', self.option_a))
+        if self.option_b:
+            options.append(('B', self.option_b))
+        if self.option_c:
+            options.append(('C', self.option_c))
+        if self.option_d:
+            options.append(('D', self.option_d))
+        if self.option_e:
+            options.append(('E', self.option_e))
+        return options
 
 
 class RoundItem(models.Model):
@@ -77,7 +101,6 @@ class MagicLink(models.Model):
     used_at = models.DateTimeField(null=True, blank=True)
 
     def is_valid(self):
-        # Reusable link: do NOT invalidate just because it was clicked once.
         if not self.panelist.is_active:
             return False
         if self.expires_at and timezone.now() > self.expires_at:

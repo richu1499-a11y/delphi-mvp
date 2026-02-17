@@ -46,7 +46,15 @@
         </div>
         <div>
           <p class="text-muted small mb-0">Your current response</p>
-          <p class="fw-semibold mb-0 fs-5">{{ response.value }}</p>
+          <p class="fw-semibold mb-0 fs-5">
+            {% if round_item.item.item_type == 'multiple' %}
+              {% for key, label in round_item.item.get_options %}
+                {% if response.value == key %}{{ key }}. {{ label }}{% endif %}
+              {% endfor %}
+            {% else %}
+              {{ response.value }}
+            {% endif %}
+          </p>
         </div>
       </div>
     {% endif %}
@@ -71,6 +79,7 @@
               <span>Strongly Agree</span>
             </div>
           </div>
+          
         {% elif round_item.item.item_type == 'yesno' %}
           <div class="mb-4">
             <label class="form-label fw-semibold mb-3">Select your answer</label>
@@ -89,6 +98,23 @@
               </div>
             </div>
           </div>
+          
+        {% elif round_item.item.item_type == 'multiple' %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Select one option</label>
+            <div class="d-grid gap-2">
+              {% for key, label in round_item.item.get_options %}
+                <div class="form-check">
+                  <input class="btn-check" type="radio" name="value" id="option{{ key }}" value="{{ key }}" {% if response and response.value == key %}checked{% endif %} required>
+                  <label class="btn btn-outline-primary btn-lg text-start w-100 py-3" for="option{{ key }}">
+                    <span class="badge bg-primary me-2">{{ key }}</span>
+                    {{ label }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          
         {% else %}
           <div class="mb-4">
             <label class="form-label fw-semibold">Your answer</label>
