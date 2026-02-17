@@ -2,8 +2,7 @@ from django.contrib import messages
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.http import HttpResponse
-from django.contrib.auth.models import User
+
 
 from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission
 
@@ -187,31 +186,3 @@ def logout_view(request):
     return redirect("home")
 
 
-# =============================================================================
-# TEMPORARY ADMIN SETUP - DELETE AFTER USE!
-# =============================================================================
-def setup_admin(request):
-    """One-time setup view to create admin user - DELETE THIS AFTER USE"""
-    secret_key = request.GET.get('key')
-    
-    # CHANGE THIS to something only you know
-    if secret_key != 'delphi2024secret':
-        return HttpResponse('Not authorized', status=403)
-    
-    # Check if admin already exists
-    if User.objects.filter(username='admin').exists():
-        return HttpResponse('Admin user already exists! You can login now.')
-    
-    # Create superuser - CHANGE THE PASSWORD!
-    User.objects.create_superuser(
-        username='admin',
-        email='admin@example.com',
-        password='DelphiAdmin2024!'  # CHANGE THIS TO YOUR PASSWORD
-    )
-    
-    return HttpResponse(
-        'Admin user created successfully!<br><br>'
-        'Username: admin<br>'
-        'Password: DelphiAdmin2024!<br><br>'
-        '<strong>NOW DELETE the setup_admin function from views.py and the URL from urls.py!</strong>'
-    )

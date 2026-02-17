@@ -9,7 +9,4 @@ urlpatterns = [
     path("item/<int:round_item_id>/", views.item_detail, name="item_detail"),
     path("magic/<uuid:token>/", views.magic_login, name="magic_login"),
     path("logout/", views.logout_view, name="logout"),
-    
-    # TEMPORARY - DELETE AFTER CREATING ADMIN USER
-    path("setup-admin/", views.setup_admin, name="setup_admin"),
 ]
