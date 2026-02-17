@@ -1,31 +1,55 @@
-{% extends 'delphi/base.html' %}
+{% extends "delphi/base.html" %}
 {% block content %}
-  <div class="card">
-    <h2>Round {{ round.number }}{% if round.name %}: {{ round.name }}{% endif %}</h2>
-    <p class="muted">
-      Status: {% if round.is_open %}<span class="badge ok">Open</span>{% elif round.status == 'CLOSED' %}<span class="badge">Closed</span>{% else %}<span class="badge warn">Draft</span>{% endif %}
-      &nbsp; | &nbsp;
-      Completed: {{ done_count }}/{{ total }}
-    </p>
-    {% if not round.is_open %}
-      <p class="badge warn">This round is not currently open for edits.</p>
-    {% endif %}
-  </div>
+<h2>{{ round }}</h2>
 
-  <div class="card">
-    <h3>Items</h3>
-    <table>
-      <thead><tr><th>Code</th><th>Domain</th><th>Status</th><th></th></tr></thead>
-      <tbody>
-        {% for x in items %}
-          <tr>
-            <td>{{ x.item.stable_code }}</td>
-            <td class="small">{{ x.item.domain_tag|default:"—" }}</td>
-            <td>{% if x.is_done %}<span class="badge ok">Answered</span>{% else %}<span class="badge warn">Pending</span>{% endif %}</td>
-            <td><a class="btn btn-primary" href="{% url 'delphi:item_detail' x.round_item.id %}">View</a></td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+{% if submitted %}
+  <div style="padding:10px; border:1px solid #ccc; background:#f7f7f7; margin:10px 0;">
+    <strong>Submitted.</strong> Your responses for this round are locked.
+    <div style="font-size: 0.9em; color:#555;">Submitted at: {{ submitted.submitted_at }}</div>
   </div>
+{% else %}
+  <div style="padding:10px; border:1px solid #e0e0e0; background:#fafafa; margin:10px 0;">
+    Answered: <strong>{{ answered }}/{{ total }}</strong>.
+    When you’re ready, click <strong>Submit Round</strong> to lock your answers.
+  </div>
+{% endif %}
+
+<ul>
+  {% for row in rows %}
+    {% with ri=row.ri resp=row.response %}
+      <li style="margin: 8px 0;">
+        <div><strong>Item {{ forloop.counter }}:</strong> {{ ri.item.prompt }}</div>
+
+        {% if resp %}
+          <div><em>Your response:</em> {{ resp.value }}</div>
+          <div>
+            <a href="{% url 'item_detail' ri.id %}">
+              {% if submitted %}View{% else %}Edit{% endif %}
+            </a>
+          </div>
+        {% else %}
+          <div><em>No response yet.</em></div>
+          <div><a href="{% url 'item_detail' ri.id %}">Answer</a></div>
+        {% endif %}
+      </li>
+    {% endwith %}
+  {% empty %}
+    <li>No items assigned to this round yet.</li>
+  {% endfor %}
+</ul>
+
+{% if not submitted %}
+  <hr>
+  <form method="post" action="{% url 'submit_round' round.id %}">
+    {% csrf_token %}
+    <button type="submit" {% if not can_submit %}disabled{% endif %}>
+      Submit Round
+    </button>
+    {% if not can_submit %}
+      <div style="font-size:0.9em; color:#777; margin-top:6px;">
+        You must answer all items ({{ answered }}/{{ total }}) before submitting.
+      </div>
+    {% endif %}
+  </form>
+{% endif %}
 {% endblock %}

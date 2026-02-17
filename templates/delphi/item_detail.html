@@ -1,59 +1,49 @@
-{% extends 'delphi/base.html' %}
+{% extends "delphi/base.html" %}
 {% block content %}
-  <div class="card">
-    <div class="muted small">Round {{ round.number }}{% if round.name %}: {{ round.name }}{% endif %}</div>
-    <h2>{{ item.stable_code }}</h2>
-    <p>{{ item.stem_text }}</p>
-    {% if item.domain_tag %}<p class="muted small">Domain: {{ item.domain_tag }}</p>{% endif %}
+<h2>Item (Round {{ round_item.round.number }})</h2>
+<p>{{ round_item.item.prompt }}</p>
+
+{% if locked %}
+  <div style="padding:10px; border:1px solid #ccc; background:#f7f7f7; margin:10px 0;">
+    <strong>Submitted.</strong> This round is locked; you can view but not edit.
   </div>
+{% endif %}
 
-  {% if prior %}
-    <div class="card">
-      <h3>Your prior-round response</h3>
-      <p class="muted small">Displayed to support iterative consensus building.</p>
-      {% if prior.likert_value %}<div>Prior Likert: <b>{{ prior.likert_value }}</b></div>{% endif %}
-      {% if prior.either_or_value %}<div>Prior Choice: <b>{{ prior.either_or_value }}</b></div>{% endif %}
-      {% if prior.comment %}<div class="muted small">Prior comment: {{ prior.comment }}</div>{% endif %}
-    </div>
-  {% endif %}
+{% if response %}
+  <p><strong>Your response:</strong> {{ response.value }}</p>
+{% endif %}
 
-  <div class="card">
-    <h3>Your response</h3>
-    {% if not round.is_open %}
-      <p class="badge warn">This round is closed; responses cannot be edited.</p>
-    {% endif %}
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      {% if round.is_open %}
-        <button class="btn btn-primary" type="submit">Save</button>
-      {% endif %}
-    </form>
-  </div>
-
-  <div class="card">
-    <h3>Group feedback</h3>
-    {% if not feedback_allowed %}
-      <p class="muted small">Per protocol, group feedback is shown only after your first submission in this round.</p>
+{% if not locked %}
+  <form method="post">
+    {% csrf_token %}
+    {% if round_item.item.item_type == 'likert5' %}
+      <label>Choose 1-5:</label>
+      <select name="value" required>
+        <option value="">--</option>
+        {% for i in "12345" %}
+          <option value="{{ i }}" {% if response and response.value == i %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+      </select>
+    {% elif round_item.item.item_type == 'yesno' %}
+      <label>Yes/No:</label>
+      <select name="value" required>
+        <option value="">--</option>
+        <option value="yes" {% if response and response.value == "yes" %}selected{% endif %}>Yes</option>
+        <option value="no" {% if response and response.value == "no" %}selected{% endif %}>No</option>
+      </select>
     {% else %}
-      {% if feedback %}
-        <p class="muted small">n={{ feedback.n }}{% if feedback.mean %}, mean={{ feedback.mean|floatformat:2 }}{% endif %}</p>
-        {% if feedback.pct_agree is not None %}
-          <div>Agreement (top-box): <b>{{ feedback.pct_agree|floatformat:2 }}</b> (threshold 0.75)</div>
-        {% endif %}
-        {% if feedback.pct_disagree is not None %}
-          <div>Disagreement (bottom-box): <b>{{ feedback.pct_disagree|floatformat:2 }}</b> (threshold 0.75)</div>
-        {% endif %}
-        <div>Consensus reached: <b>{{ feedback.consensus }}</b></div>
-        <h4>Distribution</h4>
-        <pre class="small">{{ feedback.distribution_json }}</pre>
-      {% else %}
-        <p class="muted">No feedback available yet.</p>
-      {% endif %}
+      <label>Your answer:</label>
+      <textarea name="value" rows="4" cols="60" required>{% if response %}{{ response.value }}{% endif %}</textarea>
     {% endif %}
-  </div>
+    <button type="submit">Save response</button>
+  </form>
+{% endif %}
 
-  <div class="card">
-    <a class="btn" href="{% url 'delphi:round_overview' round.id %}">Back to round</a>
-  </div>
+{% if feedback_allowed and aggregate and round_item.item.item_type == 'likert5' %}
+  <hr>
+  <h3>Group feedback (mean)</h3>
+  <p>{{ aggregate.mean|floatformat:2 }}</p>
+{% endif %}
+
+<p><a href="{% url 'round_overview' round_item.round.id %}">Back to Round</a></p>
 {% endblock %}

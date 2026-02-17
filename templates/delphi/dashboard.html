@@ -1,37 +1,17 @@
-{% extends 'delphi/base.html' %}
+{% extends "delphi/base.html" %}
 {% block content %}
-  <div class="card">
-    <h2>{{ panelist.study.title }}</h2>
-    {% if panelist.study.description %}<p class="muted">{{ panelist.study.description }}</p>{% endif %}
-  </div>
+<h2>{{ study.name }}</h2>
+<p>Welcome, {{ panelist.name|default:panelist.email }}.</p>
 
-  <div class="card">
-    <h3>Rounds</h3>
-    <table>
-      <thead>
-        <tr><th>Round</th><th>Status</th><th>Window</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for r in rounds %}
-          <tr>
-            <td>R{{ r.number }}{% if r.name %}: {{ r.name }}{% endif %}</td>
-            <td>
-              {% if r.is_open %}<span class="badge ok">Open</span>
-              {% elif r.status == 'CLOSED' %}<span class="badge">Closed</span>
-              {% else %}<span class="badge warn">Draft</span>{% endif %}
-            </td>
-            <td class="small">
-              {% if r.opens_at %}{{ r.opens_at }}{% else %}—{% endif %} → {% if r.closes_at %}{{ r.closes_at }}{% else %}—{% endif %}
-            </td>
-            <td>
-              <a class="btn btn-primary" href="{% url 'delphi:round_overview' r.id %}">Open</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if open_round %}
-      <p class="muted small">Current active round: R{{ open_round.number }}.</p>
-    {% endif %}
-  </div>
+<h3>Open rounds</h3>
+<ul>
+  {% for row in rounds %}
+    <li>
+      <a href="{% url 'round_overview' row.round.id %}">{{ row.round }}</a>
+      {% if row.is_submitted %} — <em>submitted</em>{% endif %}
+    </li>
+  {% empty %}
+    <li>No open rounds currently.</li>
+  {% endfor %}
+</ul>
 {% endblock %}

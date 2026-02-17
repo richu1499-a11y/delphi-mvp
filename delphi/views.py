@@ -1,169 +1,217 @@
-from __future__ import annotations
-
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.contrib import messages
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+from django.contrib.auth.models import User
 
-from .forms import Likert5Form, EitherOrForm
-from .models import MagicLink, Panelist, Round, RoundItem, Response, Item
-from .services import compute_feedback_for_round_item
-
-
-SESSION_PANELIST_ID = "edelphi_panelist_id"
+from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission
 
 
-def _require_panelist(request: HttpRequest) -> Panelist:
-    pid = request.session.get(SESSION_PANELIST_ID)
-    if not pid:
-        raise PermissionError("Not authenticated")
-    panelist = get_object_or_404(Panelist, id=pid, is_active=True)
-    return panelist
+def _require_panelist(request):
+    panelist_id = request.session.get("panelist_id")
+    if not panelist_id:
+        return None
+    return Panelist.objects.filter(id=panelist_id, is_active=True).first()
 
 
-def home(request: HttpRequest) -> HttpResponse:
-    # If logged in, go to dashboard.
-    if request.session.get(SESSION_PANELIST_ID):
-        return redirect("delphi:dashboard")
+def home(request):
     return render(request, "delphi/home.html")
 
 
-def magic_login(request: HttpRequest, token: str) -> HttpResponse:
-    link = get_object_or_404(MagicLink, token=token)
-    if not link.is_valid:
-        return render(request, "delphi/login_invalid.html", {"link": link})
-    link.used_at = timezone.now()
-    link.save(update_fields=["used_at"])
-    request.session[SESSION_PANELIST_ID] = link.panelist_id
-    return redirect("delphi:dashboard")
+def dashboard(request):
+    panelist = _require_panelist(request)
+    if not panelist:
+        return redirect("home")
 
+    study = panelist.study
+    open_rounds = study.rounds.filter(is_open=True).order_by("number")
 
-def logout(request: HttpRequest) -> HttpResponse:
-    request.session.flush()
-    return redirect("delphi:home")
-
-
-def dashboard(request: HttpRequest) -> HttpResponse:
-    try:
-        panelist = _require_panelist(request)
-    except PermissionError:
-        return redirect("delphi:home")
-
-    rounds = Round.objects.filter(study=panelist.study).order_by("number")
-    open_round = next((r for r in rounds if r.is_open), None)
+    rounds = []
+    for r in open_rounds:
+        rounds.append(
+            {
+                "round": r,
+                "is_submitted": RoundSubmission.objects.filter(panelist=panelist, round=r).exists(),
+            }
+        )
 
     return render(
         request,
         "delphi/dashboard.html",
-        {"panelist": panelist, "rounds": rounds, "open_round": open_round},
+        {"panelist": panelist, "study": study, "rounds": rounds},
     )
 
 
-def round_overview(request: HttpRequest, round_id: int) -> HttpResponse:
+def round_overview(request, round_id):
     panelist = _require_panelist(request)
-    rnd = get_object_or_404(Round, id=round_id, study=panelist.study)
+    if not panelist:
+        return redirect("home")
 
-    round_items = RoundItem.objects.filter(round=rnd).select_related("item").order_by("item__order_index", "item__stable_code")
+    round_obj = get_object_or_404(Round, id=round_id, study=panelist.study)
+    ris = list(round_obj.round_items.select_related("item").all())
 
-    # Completion: response exists for each item
-    responded_ids = set(
-        Response.objects.filter(round_item__round=rnd, panelist=panelist).values_list("round_item_id", flat=True)
-    )
-    items_ctx = []
-    for ri in round_items:
-        items_ctx.append(
-            {"round_item": ri, "item": ri.item, "is_done": ri.id in responded_ids}
-        )
+    submitted = RoundSubmission.objects.filter(panelist=panelist, round=round_obj).first()
 
-    done_count = sum(1 for x in items_ctx if x["is_done"])
-    total = len(items_ctx)
+    resp_map = {
+        r.round_item_id: r
+        for r in Response.objects.filter(panelist=panelist, round_item__round=round_obj)
+    }
+
+    rows = [{"ri": ri, "response": resp_map.get(ri.id)} for ri in ris]
+
+    total = len(ris)
+    answered = sum(1 for row in rows if row["response"] is not None)
+    can_submit = (submitted is None) and (total > 0) and (answered == total)
 
     return render(
         request,
         "delphi/round_overview.html",
-        {"panelist": panelist, "round": rnd, "items": items_ctx, "done_count": done_count, "total": total},
+        {
+            "panelist": panelist,
+            "round": round_obj,
+            "rows": rows,
+            "submitted": submitted,
+            "total": total,
+            "answered": answered,
+            "can_submit": can_submit,
+        },
     )
 
 
-def item_detail(request: HttpRequest, round_item_id: int) -> HttpResponse:
+@require_POST
+def submit_round(request, round_id):
     panelist = _require_panelist(request)
-    ri = get_object_or_404(RoundItem.objects.select_related("round", "item", "round__study"), id=round_item_id)
-    rnd = ri.round
-    if ri.round.study_id != panelist.study_id:
-        return HttpResponseForbidden("Wrong study")
+    if not panelist:
+        return redirect("home")
 
-    # Load existing response if any
-    resp = Response.objects.filter(round_item=ri, panelist=panelist).first()
+    round_obj = get_object_or_404(Round, id=round_id, study=panelist.study)
 
-    if ri.item.response_type == Item.ResponseType.LIKERT_5:
-        form = Likert5Form(request.POST or None, initial={
-            "likert_value": str(resp.likert_value) if resp and resp.likert_value else None,
-            "comment": resp.comment if resp else "",
-            "suggested_revision": resp.suggested_revision if resp else "",
-        })
-    else:
-        form = EitherOrForm(request.POST or None, initial={
-            "either_or_value": resp.either_or_value if resp else None,
-            "comment": resp.comment if resp else "",
-            "suggested_revision": resp.suggested_revision if resp else "",
-        })
-        form.set_option_labels(ri.item.option_a or "Option A", ri.item.option_b or "Option B")
+    existing = RoundSubmission.objects.filter(panelist=panelist, round=round_obj).first()
+    if existing:
+        messages.info(request, "This round is already submitted and locked.")
+        return redirect("round_overview", round_id=round_obj.id)
 
-    if request.method == "POST" and form.is_valid():
-        data = form.cleaned_data
-        resp, _ = Response.objects.get_or_create(round_item=ri, panelist=panelist)
-        resp.comment = data.get("comment", "")
-        resp.suggested_revision = data.get("suggested_revision", "")
+    total = round_obj.round_items.count()
+    answered = Response.objects.filter(panelist=panelist, round_item__round=round_obj).count()
 
-        if ri.item.response_type == Item.ResponseType.LIKERT_5:
-            resp.likert_value = int(data["likert_value"])
-            resp.either_or_value = None
+    if total == 0:
+        messages.error(request, "This round has no items yet.")
+        return redirect("round_overview", round_id=round_obj.id)
+
+    if answered < total:
+        messages.error(
+            request,
+            f"Please answer all items before submitting (answered {answered}/{total}).",
+        )
+        return redirect("round_overview", round_id=round_obj.id)
+
+    RoundSubmission.objects.create(panelist=panelist, round=round_obj)
+    messages.success(request, "Submitted. Your responses are now locked.")
+    return redirect("round_overview", round_id=round_obj.id)
+
+
+def item_detail(request, round_item_id):
+    panelist = _require_panelist(request)
+    if not panelist:
+        return redirect("home")
+
+    ri = get_object_or_404(RoundItem, id=round_item_id, round__study=panelist.study)
+    round_obj = ri.round
+
+    submitted = RoundSubmission.objects.filter(panelist=panelist, round=round_obj).first()
+    locked = submitted is not None
+
+    resp = Response.objects.filter(panelist=panelist, round_item=ri).first()
+
+    if request.method == "POST":
+        if locked:
+            messages.error(request, "This round has been submitted. Responses are locked.")
+            return redirect("round_overview", round_id=round_obj.id)
+
+        value = request.POST.get("value", "").strip()
+        if not value:
+            messages.error(request, "Please provide a response.")
         else:
-            resp.either_or_value = data["either_or_value"]
-            resp.likert_value = None
+            Response.objects.update_or_create(
+                panelist=panelist, round_item=ri, defaults={"value": value}
+            )
+            messages.success(request, "Saved.")
 
-        resp.save()
-        # Update feedback cache (real-time behavior)
-        compute_feedback_for_round_item(ri, overwrite=True)
-        return redirect("delphi:item_detail", round_item_id=ri.id)
+        return redirect("round_overview", round_id=round_obj.id)
 
-    # Feedback gating logic:
-    # Protocol: show group average only after first submission for round 1; in later rounds can show immediately.
-    feedback_allowed = False
-    if rnd.show_feedback_immediately:
-        feedback_allowed = True
-    else:
-        # allowed after participant has submitted at least one response in this round
-        has_any = Response.objects.filter(round_item__round=rnd, panelist=panelist).exists()
+    feedback_allowed = True
+    if round_obj.number == 1 and not round_obj.show_feedback_immediately:
+        has_any = Response.objects.filter(panelist=panelist, round_item__round=round_obj).exists()
         feedback_allowed = has_any
 
-    feedback = None
-    if feedback_allowed:
-        feedback = getattr(ri, "feedback", None)
-        if feedback is None:
-            feedback = compute_feedback_for_round_item(ri, overwrite=True)
-
-    # Prior round rating (optional) – used in 2-round workflows
-    prior = None
-    if rnd.show_prior_round_rating and rnd.number > 1:
-        prior_round = Round.objects.filter(study=rnd.study, number=rnd.number - 1).first()
-        if prior_round:
-            prior_ri = RoundItem.objects.filter(round=prior_round, item__stable_code=ri.item.stable_code, item__version=ri.item.version).first()
-            if prior_ri:
-                prior = Response.objects.filter(round_item=prior_ri, panelist=panelist).first()
+    agg = None
+    if feedback_allowed and ri.item.item_type == "likert5":
+        agg = Response.objects.filter(round_item=ri).aggregate(mean=Avg("value"))
 
     return render(
         request,
         "delphi/item_detail.html",
         {
             "panelist": panelist,
-            "round": rnd,
             "round_item": ri,
-            "item": ri.item,
-            "form": form,
             "response": resp,
+            "aggregate": agg,
             "feedback_allowed": feedback_allowed,
-            "feedback": feedback,
-            "prior": prior,
+            "locked": locked,
+            "submitted": submitted,
         },
+    )
+
+
+def magic_login(request, token):
+    magic = get_object_or_404(MagicLink, token=token)
+    if not magic.is_valid():
+        messages.error(request, "That link is invalid or expired.")
+        return redirect("home")
+
+    # Reusable link: we don't mark it as used here.
+    request.session["panelist_id"] = magic.panelist_id
+
+    # Optional deep-link: /magic/<token>/?next=/round/1/
+    next_url = request.GET.get("next", "")
+    if next_url.startswith("/"):
+        return redirect(next_url)
+
+    return redirect("dashboard")
+
+
+def logout_view(request):
+    request.session.flush()
+    messages.success(request, "Logged out.")
+    return redirect("home")
+
+
+# =============================================================================
+# TEMPORARY ADMIN SETUP - DELETE AFTER USE!
+# =============================================================================
+def setup_admin(request):
+    """One-time setup view to create admin user - DELETE THIS AFTER USE"""
+    secret_key = request.GET.get('key')
+    
+    # CHANGE THIS to something only you know
+    if secret_key != 'delphi2024secret':
+        return HttpResponse('Not authorized', status=403)
+    
+    # Check if admin already exists
+    if User.objects.filter(username='admin').exists():
+        return HttpResponse('Admin user already exists! You can login now.')
+    
+    # Create superuser - CHANGE THE PASSWORD!
+    User.objects.create_superuser(
+        username='admin',
+        email='admin@example.com',
+        password='DelphiAdmin2024!'  # CHANGE THIS TO YOUR PASSWORD
+    )
+    
+    return HttpResponse(
+        'Admin user created successfully!<br><br>'
+        'Username: admin<br>'
+        'Password: DelphiAdmin2024!<br><br>'
+        '<strong>NOW DELETE the setup_admin function from views.py and the URL from urls.py!</strong>'
     )

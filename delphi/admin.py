@@ -1,57 +1,86 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
-from .models import Study, Round, Item, Panelist, MagicLink, RoundItem, Response, FeedbackStat
+from .models import (
+    FeedbackAggregate,
+    Item,
+    MagicLink,
+    Panelist,
+    Response,
+    Round,
+    RoundItem,
+    Study,
+    RoundSubmission,
+)
 
 
 @admin.register(Study)
 class StudyAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "created_at")
-    search_fields = ("title",)
+    list_display = ("name", "created_at")
+    search_fields = ("name",)
 
 
 @admin.register(Round)
 class RoundAdmin(admin.ModelAdmin):
-    list_display = ("id", "study", "number", "name", "status", "opens_at", "closes_at", "show_feedback_immediately")
-    list_filter = ("status", "study")
+    list_display = ("study", "number", "is_open", "show_feedback_immediately", "created_at")
+    list_filter = ("study", "is_open", "show_feedback_immediately")
+    search_fields = ("study__name",)
     ordering = ("study", "number")
 
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "study", "stable_code", "version", "response_type", "domain_tag", "order_index", "updated_at")
-    list_filter = ("study", "response_type")
-    search_fields = ("stable_code", "stem_text", "domain_tag")
-    ordering = ("study", "order_index", "stable_code", "version")
+    list_display = ("study", "item_type", "prompt_short", "created_at")
+    list_filter = ("study", "item_type")
+    search_fields = ("prompt",)
 
-
-@admin.register(Panelist)
-class PanelistAdmin(admin.ModelAdmin):
-    list_display = ("id", "study", "email", "display_name", "affiliation", "is_active", "created_at")
-    list_filter = ("study", "is_active")
-    search_fields = ("email", "display_name", "affiliation")
-
-
-@admin.register(MagicLink)
-class MagicLinkAdmin(admin.ModelAdmin):
-    list_display = ("id", "panelist", "created_at", "expires_at", "used_at")
-    list_filter = ("panelist__study",)
+    def prompt_short(self, obj):
+        return (obj.prompt[:60] + "...") if len(obj.prompt) > 60 else obj.prompt
 
 
 @admin.register(RoundItem)
 class RoundItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "round", "item")
-    list_filter = ("round__study", "round")
-    search_fields = ("item__stable_code", "item__stem_text")
+    list_display = ("round", "order", "item_short")
+    list_filter = ("round__study", "round__number")
+    search_fields = ("item__prompt",)
+    ordering = ("round__study", "round__number", "order")
+
+    def item_short(self, obj):
+        return (obj.item.prompt[:60] + "...") if len(obj.item.prompt) > 60 else obj.item.prompt
+
+
+@admin.register(Panelist)
+class PanelistAdmin(admin.ModelAdmin):
+    list_display = ("study", "email", "name", "is_active", "created_at")
+    list_filter = ("study", "is_active")
+    search_fields = ("email", "name")
+
+
+@admin.register(MagicLink)
+class MagicLinkAdmin(admin.ModelAdmin):
+    list_display = ("panelist", "token", "expires_at", "login_link", "created_at")
+    list_filter = ("panelist__study",)
+    search_fields = ("panelist__email",)
+
+    def login_link(self, obj):
+        url = f"https://delphi-mvp.onrender.com/magic/{obj.token}/"
+        return format_html('<a href="{}" target="_blank">{}</a>', url, "open link")
 
 
 @admin.register(Response)
 class ResponseAdmin(admin.ModelAdmin):
-    list_display = ("id", "round_item", "panelist", "likert_value", "either_or_value", "updated_at")
-    list_filter = ("round_item__round", "round_item__round__study")
-    search_fields = ("panelist__email", "round_item__item__stable_code")
+    list_display = ("panelist", "round_item", "value", "created_at")
+    list_filter = ("panelist__study", "round_item__round__number")
+    search_fields = ("panelist__email", "round_item__item__prompt", "value")
 
 
-@admin.register(FeedbackStat)
-class FeedbackStatAdmin(admin.ModelAdmin):
-    list_display = ("id", "round_item", "n", "mean", "pct_agree", "pct_disagree", "consensus", "computed_at")
-    list_filter = ("round_item__round", "round_item__round__study", "consensus")
+@admin.register(RoundSubmission)
+class RoundSubmissionAdmin(admin.ModelAdmin):
+    list_display = ("panelist", "round", "submitted_at")
+    list_filter = ("round__study", "round__number")
+    search_fields = ("panelist__email",)
+
+
+@admin.register(FeedbackAggregate)
+class FeedbackAggregateAdmin(admin.ModelAdmin):
+    list_display = ("round_item", "mean", "median", "n", "computed_at")

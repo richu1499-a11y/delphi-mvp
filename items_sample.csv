@@ -1,0 +1,6 @@
+stable_code,domain_tag,stem_text,response_type,option_a,option_b,order_index,version
+Q001,Feasibility,"This intervention is feasible to implement across participating sites.",LIKERT_5,,,1,1
+Q002,Acceptability,"Clinicians would find the recommendation acceptable in routine practice.",LIKERT_5,,,2,1
+Q003,Clarity,"The wording of this item is clear and unambiguous.",LIKERT_5,,,3,1
+Q004,Preference,"Preferred follow-up cadence:",EITHER_OR,"Weekly","Monthly",4,1
+Q005,Format,"Preferred reporting format:",EITHER_OR,"Numeric risk (%)","Risk category (Low/Moderate/High)",5,1
