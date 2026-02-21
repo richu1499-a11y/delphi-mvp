@@ -1,6 +1,6 @@
 {% extends "delphi/base.html" %}
 
-{% block title %}Item — Round {{ round_item.round.number }}{% endblock %}
+{% block title %}Survey Item — Round {{ round_item.round.number }}{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb -->
@@ -8,7 +8,7 @@
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
     <li class="breadcrumb-item"><a href="{% url 'round_overview' round_item.round.id %}">Round {{ round_item.round.number }}</a></li>
-    <li class="breadcrumb-item active">Item</li>
+    <li class="breadcrumb-item active">Survey Item</li>
   </ol>
 </nav>
 
@@ -16,45 +16,54 @@
 <div class="card mb-4">
   <div class="card-header">
     <div class="d-flex align-items-center">
-      <div class="icon-circle me-3" style="background-color: rgba(255,255,255,0.2);">
-        <i class="bi bi-question-circle text-white"></i>
+      <div class="icon-circle icon-circle-primary me-3" style="background-color: rgba(255,255,255,0.2);">
+        <i class="bi bi-chat-square-text text-white"></i>
       </div>
       <div>
-        <h4 class="mb-0">Survey Item</h4>
-        <p class="mb-0 opacity-75 small">Round {{ round_item.round.number }}</p>
+        <h5 class="mb-0">Survey Item</h5>
+        <small class="opacity-75">Round {{ round_item.round.number }}</small>
       </div>
     </div>
   </div>
   <div class="card-body">
-    <div class="bg-light rounded-3 p-4 mb-4">
-      <p class="lead mb-0">{{ round_item.item.prompt }}</p>
+    <!-- Question Box -->
+    <div class="question-box">
+      <p>{{ round_item.item.prompt }}</p>
     </div>
     
     {% if locked %}
       <div class="alert alert-success d-flex align-items-center">
-        <i class="bi bi-lock me-2"></i>
+        <i class="bi bi-lock me-3 fs-4"></i>
         <div>
-          <strong>Round Submitted</strong> — This round is locked. You can view but not edit your response.
+          <strong>Round Submitted</strong><br>
+          <small>This round is locked. You can view but not edit your response.</small>
         </div>
       </div>
     {% endif %}
     
     {% if response %}
-      <div class="d-flex align-items-center mb-4">
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
         <div class="icon-circle icon-circle-success me-3">
           <i class="bi bi-check-lg"></i>
         </div>
         <div>
-          <p class="text-muted small mb-0">Your current response</p>
-          <p class="fw-semibold mb-0 fs-5">
+          <small class="text-muted d-block">Your Current Response</small>
+          <strong class="fs-5">
             {% if round_item.item.item_type == 'multiple' %}
               {% for key, label in round_item.item.get_options %}
                 {% if response.value == key %}{{ key }}. {{ label }}{% endif %}
               {% endfor %}
+            {% elif round_item.item.item_type == 'likert5' %}
+              {% if response.value == '1' %}1 - Strongly Disagree
+              {% elif response.value == '2' %}2 - Disagree
+              {% elif response.value == '3' %}3 - Neutral
+              {% elif response.value == '4' %}4 - Agree
+              {% elif response.value == '5' %}5 - Strongly Agree
+              {% else %}{{ response.value }}{% endif %}
             {% else %}
               {{ response.value }}
             {% endif %}
-          </p>
+          </strong>
         </div>
       </div>
     {% endif %}
@@ -64,70 +73,87 @@
         {% csrf_token %}
         
         {% if round_item.item.item_type == 'likert5' %}
-          <div class="mb-4">
-            <label class="form-label fw-semibold mb-3">Select your rating (1-5)</label>
-            <div class="d-flex gap-2 flex-wrap">
-              {% for i in "12345" %}
-                <div class="form-check form-check-inline">
-                  <input class="btn-check" type="radio" name="value" id="rating{{ i }}" value="{{ i }}" {% if response and response.value == i %}checked{% endif %} required>
-                  <label class="btn btn-outline-primary btn-lg px-4" for="rating{{ i }}">{{ i }}</label>
-                </div>
-              {% endfor %}
+          <label class="form-label fw-bold mb-3">Please indicate your level of agreement:</label>
+          <div class="likert-scale">
+            <div class="likert-option">
+              <input type="radio" name="value" id="likert1" value="1" {% if response and response.value == '1' %}checked{% endif %} required>
+              <label for="likert1">
+                <span class="likert-number">1</span>
+                <span class="likert-label">Strongly<br>Disagree</span>
+              </label>
             </div>
-            <div class="d-flex justify-content-between text-muted small mt-2" style="max-width: 320px;">
-              <span>Strongly Disagree</span>
-              <span>Strongly Agree</span>
+            <div class="likert-option">
+              <input type="radio" name="value" id="likert2" value="2" {% if response and response.value == '2' %}checked{% endif %} required>
+              <label for="likert2">
+                <span class="likert-number">2</span>
+                <span class="likert-label">Disagree</span>
+              </label>
+            </div>
+            <div class="likert-option">
+              <input type="radio" name="value" id="likert3" value="3" {% if response and response.value == '3' %}checked{% endif %} required>
+              <label for="likert3">
+                <span class="likert-number">3</span>
+                <span class="likert-label">Neutral</span>
+              </label>
+            </div>
+            <div class="likert-option">
+              <input type="radio" name="value" id="likert4" value="4" {% if response and response.value == '4' %}checked{% endif %} required>
+              <label for="likert4">
+                <span class="likert-number">4</span>
+                <span class="likert-label">Agree</span>
+              </label>
+            </div>
+            <div class="likert-option">
+              <input type="radio" name="value" id="likert5" value="5" {% if response and response.value == '5' %}checked{% endif %} required>
+              <label for="likert5">
+                <span class="likert-number">5</span>
+                <span class="likert-label">Strongly<br>Agree</span>
+              </label>
             </div>
           </div>
           
         {% elif round_item.item.item_type == 'yesno' %}
-          <div class="mb-4">
-            <label class="form-label fw-semibold mb-3">Select your answer</label>
-            <div class="d-flex gap-3">
-              <div class="form-check">
-                <input class="btn-check" type="radio" name="value" id="yes" value="yes" {% if response and response.value == "yes" %}checked{% endif %} required>
-                <label class="btn btn-outline-success btn-lg px-5" for="yes">
-                  <i class="bi bi-check-lg me-2"></i>Yes
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="btn-check" type="radio" name="value" id="no" value="no" {% if response and response.value == "no" %}checked{% endif %} required>
-                <label class="btn btn-outline-danger btn-lg px-5" for="no">
-                  <i class="bi bi-x-lg me-2"></i>No
-                </label>
-              </div>
+          <label class="form-label fw-bold mb-3">Please select your answer:</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="btn-check" type="radio" name="value" id="yes" value="yes" {% if response and response.value == "yes" %}checked{% endif %} required>
+              <label class="btn btn-outline-success btn-lg px-5 py-3" for="yes">
+                <i class="bi bi-check-circle me-2"></i>Yes
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="btn-check" type="radio" name="value" id="no" value="no" {% if response and response.value == "no" %}checked{% endif %} required>
+              <label class="btn btn-outline-danger btn-lg px-5 py-3" for="no">
+                <i class="bi bi-x-circle me-2"></i>No
+              </label>
             </div>
           </div>
           
         {% elif round_item.item.item_type == 'multiple' %}
-          <div class="mb-4">
-            <label class="form-label fw-semibold mb-3">Select one option</label>
-            <div class="d-grid gap-2">
-              {% for key, label in round_item.item.get_options %}
-                <div class="form-check">
-                  <input class="btn-check" type="radio" name="value" id="option{{ key }}" value="{{ key }}" {% if response and response.value == key %}checked{% endif %} required>
-                  <label class="btn btn-outline-primary btn-lg text-start w-100 py-3" for="option{{ key }}">
-                    <span class="badge bg-primary me-2">{{ key }}</span>
-                    {{ label }}
-                  </label>
-                </div>
-              {% endfor %}
-            </div>
+          <label class="form-label fw-bold mb-3">Please select one option:</label>
+          <div class="d-grid gap-2">
+            {% for key, label in round_item.item.get_options %}
+              <div class="form-check">
+                <input class="btn-check" type="radio" name="value" id="option{{ key }}" value="{{ key }}" {% if response and response.value == key %}checked{% endif %} required>
+                <label class="btn btn-outline-primary btn-lg text-start w-100 py-3" for="option{{ key }}">
+                  <span class="badge bg-primary me-2">{{ key }}</span>
+                  {{ label }}
+                </label>
+              </div>
+            {% endfor %}
           </div>
           
         {% else %}
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Your answer</label>
-            <textarea name="value" class="form-control" rows="5" placeholder="Enter your response here..." required>{% if response %}{{ response.value }}{% endif %}</textarea>
-          </div>
+          <label class="form-label fw-bold mb-3">Please provide your response:</label>
+          <textarea name="value" class="form-control" rows="5" placeholder="Enter your response here..." required>{% if response %}{{ response.value }}{% endif %}</textarea>
         {% endif %}
         
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 mt-4">
           <button type="submit" class="btn btn-primary btn-lg">
             <i class="bi bi-check-lg me-2"></i>Save Response
           </button>
           <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-secondary btn-lg">
-            Cancel
+            <i class="bi bi-arrow-left me-2"></i>Back to Round
           </a>
         </div>
       </form>
@@ -138,27 +164,20 @@
 <!-- Feedback Section -->
 {% if feedback_allowed and aggregate and round_item.item.item_type == 'likert5' %}
   <div class="card">
-    <div class="card-header" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
-      <h4 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Group Feedback</h4>
+    <div class="card-header" style="background: linear-gradient(135deg, #0A8043 0%, #0D9D4F 100%);">
+      <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Group Feedback</h5>
     </div>
     <div class="card-body">
       <div class="d-flex align-items-center">
-        <div class="icon-circle icon-circle-success me-3" style="width: 4rem; height: 4rem; font-size: 1.25rem;">
+        <div class="icon-circle icon-circle-success me-3" style="width: 4rem; height: 4rem; font-size: 1.5rem;">
           <i class="bi bi-people"></i>
         </div>
         <div>
-          <p class="text-muted small mb-0">Average Rating (Mean)</p>
-          <p class="display-6 fw-bold mb-0 text-success">{{ aggregate.mean|floatformat:2 }}</p>
+          <small class="text-muted d-block">Average Rating (Mean)</small>
+          <span class="display-5 fw-bold text-success">{{ aggregate.mean|floatformat:2 }}</span>
         </div>
       </div>
     </div>
   </div>
 {% endif %}
-
-<!-- Back Button -->
-<div class="mt-4">
-  <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-primary">
-    <i class="bi bi-arrow-left me-2"></i>Back to Round Overview
-  </a>
-</div>
 {% endblock %}

@@ -1,52 +1,80 @@
 {% extends 'delphi/base.html' %}
 
-{% block title %}Welcome — Delphi Study Portal{% endblock %}
+{% block title %}Welcome — PEP Delphi Consensus Study{% endblock %}
 
 {% block content %}
-<div class="welcome-hero">
-  <div class="icon-circle icon-circle-primary mx-auto mb-4" style="width: 5rem; height: 5rem; font-size: 2.5rem;">
-    <i class="bi bi-clipboard2-data"></i>
+<div class="card mb-4">
+  <div class="card-body text-center py-5">
+    <div class="icon-circle icon-circle-primary mx-auto mb-4" style="width: 5rem; height: 5rem; font-size: 2.5rem;">
+      <i class="bi bi-clipboard2-pulse"></i>
+    </div>
+    <h2 class="mb-3">Welcome to the PEP Delphi Consensus Study</h2>
+    <p class="lead text-muted mb-4" style="max-width: 700px; margin: 0 auto;">
+      This study aims to establish expert consensus on standardizing post-ERCP pancreatitis definitions, 
+      outcome measures, and research priorities through a structured Delphi methodology.
+    </p>
+    <hr class="my-4" style="max-width: 100px; margin: 0 auto;">
+    <p class="text-muted">
+      <i class="bi bi-envelope me-2"></i>
+      Please use the personalized link from your invitation email to access the survey.
+    </p>
   </div>
-  <h1>Welcome to the Delphi Study Portal</h1>
-  <p>This is a secure, invite-only platform for expert consensus studies. Please use the personalized link from your invitation email to access your survey.</p>
 </div>
 
-<div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-body p-4">
-        <div class="row text-center">
-          <div class="col-md-4 mb-4 mb-md-0">
-            <div class="icon-circle icon-circle-primary mx-auto mb-3">
-              <i class="bi bi-shield-lock"></i>
-            </div>
-            <h5 class="fw-semibold">Secure & Private</h5>
-            <p class="text-muted small mb-0">Your responses are confidential and anonymized</p>
-          </div>
-          <div class="col-md-4 mb-4 mb-md-0">
-            <div class="icon-circle icon-circle-success mx-auto mb-3">
-              <i class="bi bi-people"></i>
-            </div>
-            <h5 class="fw-semibold">Expert Consensus</h5>
-            <p class="text-muted small mb-0">Collaborate with leading experts in the field</p>
-          </div>
-          <div class="col-md-4">
-            <div class="icon-circle icon-circle-warning mx-auto mb-3">
-              <i class="bi bi-graph-up"></i>
-            </div>
-            <h5 class="fw-semibold">Real-time Feedback</h5>
-            <p class="text-muted small mb-0">View aggregated results after submission</p>
-          </div>
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center p-4">
+        <div class="icon-circle icon-circle-primary mx-auto mb-3">
+          <i class="bi bi-shield-lock"></i>
         </div>
+        <h5 class="fw-bold">Secure & Confidential</h5>
+        <p class="text-muted small mb-0">Your responses are anonymized and stored securely in compliance with research protocols.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center p-4">
+        <div class="icon-circle icon-circle-success mx-auto mb-3">
+          <i class="bi bi-people"></i>
+        </div>
+        <h5 class="fw-bold">Expert Panel</h5>
+        <p class="text-muted small mb-0">Join leading gastroenterologists and researchers in establishing evidence-based consensus.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center p-4">
+        <div class="icon-circle icon-circle-warning mx-auto mb-3">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h5 class="fw-bold">Real-Time Feedback</h5>
+        <p class="text-muted small mb-0">View aggregated results and group consensus after completing each round.</p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="text-center mt-4">
-  <p class="text-muted">
-    <i class="bi bi-envelope me-1"></i>
-    Don't have a link? Contact the study administrator for access.
-  </p>
+<div class="card mt-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About This Study</h5>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">
+      Post-ERCP pancreatitis (PEP) remains one of the most common and serious complications of endoscopic retrograde cholangiopancreatography. 
+      Despite extensive research, there is significant heterogeneity in how PEP is defined, measured, and reported across clinical trials.
+    </p>
+    <p class="mb-0">
+      This Delphi study brings together international experts to establish consensus on:
+    </p>
+    <ul class="mt-2 mb-0">
+      <li>Standardized definitions for PEP and its severity grades</li>
+      <li>Minimum criteria for high-quality PEP prophylaxis research</li>
+      <li>Core outcome measures for future clinical trials</li>
+      <li>Research priorities in the field</li>
+    </ul>
+  </div>
 </div>
 {% endblock %}

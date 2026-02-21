@@ -8,12 +8,10 @@
   <div class="card-header">
     <div class="d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center">
-        <div class="icon-circle me-3" style="background-color: rgba(255,255,255,0.2);">
+        <div class="icon-circle icon-circle-primary me-3" style="background-color: rgba(255,255,255,0.2);">
           <i class="bi bi-list-task text-white"></i>
         </div>
-        <div>
-          <h4 class="mb-0">{{ round }}</h4>
-        </div>
+        <h5 class="mb-0">{{ round }}</h5>
       </div>
       <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
@@ -34,25 +32,27 @@
     </div>
   </div>
 {% else %}
-  <div class="progress-info">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <span class="fw-semibold">Progress</span>
-      <span class="badge bg-primary">{{ answered }} of {{ total }} completed</span>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold">Progress</span>
+        <span class="badge bg-primary">{{ answered }} of {{ total }} completed</span>
+      </div>
+      <div class="progress mb-2">
+        <div class="progress-bar" role="progressbar" style="width: {% widthratio answered total 100 %}%"></div>
+      </div>
+      <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        Complete all items to submit this round.
+      </small>
     </div>
-    <div class="progress">
-      <div class="progress-bar" role="progressbar" style="width: {% widthratio answered total 100 %}%"></div>
-    </div>
-    <p class="text-muted small mt-2 mb-0">
-      <i class="bi bi-info-circle me-1"></i>
-      Complete all items to submit this round
-    </p>
   </div>
 {% endif %}
 
 <!-- Items List -->
 <div class="card">
   <div class="card-header">
-    <h4 class="mb-0"><i class="bi bi-question-circle me-2"></i>Survey Items</h4>
+    <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>Survey Items</h5>
   </div>
   <div class="card-body">
     {% if rows %}
@@ -70,12 +70,14 @@
                     {% endif %}
                   </div>
                   <div>
-                    <h6 class="fw-semibold mb-2">Item {{ forloop.counter }}</h6>
-                    <p class="mb-2 text-muted">{{ ri.item.prompt }}</p>
+                    <h6 class="fw-bold mb-2">Item {{ forloop.counter }}</h6>
+                    <p class="mb-2 text-muted">{{ ri.item.prompt|truncatewords:30 }}</p>
                     {% if resp %}
                       <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-1">
                         <i class="bi bi-chat-square-text me-2 text-primary"></i>
-                        <span class="small fw-medium">Your response: <strong>{{ resp.value }}</strong></span>
+                        <small class="fw-medium">
+                          Response recorded
+                        </small>
                       </div>
                     {% else %}
                       <span class="badge badge-status badge-pending">

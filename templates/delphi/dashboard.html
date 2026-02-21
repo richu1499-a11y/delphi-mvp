@@ -3,16 +3,16 @@
 {% block title %}Dashboard — {{ study.name }}{% endblock %}
 
 {% block content %}
-<!-- Welcome Header -->
+<!-- Welcome Card -->
 <div class="card mb-4">
   <div class="card-header">
     <div class="d-flex align-items-center">
       <div class="icon-circle icon-circle-primary me-3" style="background-color: rgba(255,255,255,0.2);">
-        <i class="bi bi-journal-text text-white"></i>
+        <i class="bi bi-journal-medical text-white"></i>
       </div>
       <div>
-        <h4 class="mb-1">{{ study.name }}</h4>
-        <p class="mb-0 opacity-75" style="font-size: 0.9rem;">Expert Consensus Study</p>
+        <h5 class="mb-0">{{ study.name }}</h5>
+        <small class="opacity-75">Expert Consensus Study</small>
       </div>
     </div>
   </div>
@@ -22,8 +22,8 @@
         <i class="bi bi-person-check"></i>
       </div>
       <div>
-        <p class="mb-0 text-muted small">Logged in as</p>
-        <p class="mb-0 fw-semibold">{{ panelist.name|default:panelist.email }}</p>
+        <small class="text-muted d-block">Logged in as</small>
+        <strong>{{ panelist.name|default:panelist.email }}</strong>
       </div>
     </div>
   </div>
@@ -32,7 +32,7 @@
 <!-- Rounds Section -->
 <div class="card">
   <div class="card-header">
-    <h4><i class="bi bi-list-check me-2"></i>Survey Rounds</h4>
+    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Survey Rounds</h5>
   </div>
   <div class="card-body">
     {% if rounds %}
@@ -44,18 +44,16 @@
                 <i class="bi bi-{% if row.is_submitted %}check-lg{% else %}pencil{% endif %}"></i>
               </div>
               <div>
-                <h5 class="mb-1 fw-semibold">{{ row.round }}</h5>
-                <p class="mb-0 text-muted small">
-                  {% if row.is_submitted %}
-                    <span class="badge badge-status badge-submitted">
-                      <i class="bi bi-check-circle me-1"></i>Submitted
-                    </span>
-                  {% else %}
-                    <span class="badge badge-status badge-pending">
-                      <i class="bi bi-clock me-1"></i>In Progress
-                    </span>
-                  {% endif %}
-                </p>
+                <h6 class="mb-1 fw-bold">{{ row.round }}</h6>
+                {% if row.is_submitted %}
+                  <span class="badge badge-status badge-submitted">
+                    <i class="bi bi-check-circle me-1"></i>Submitted
+                  </span>
+                {% else %}
+                  <span class="badge badge-status badge-pending">
+                    <i class="bi bi-clock me-1"></i>In Progress
+                  </span>
+                {% endif %}
               </div>
             </div>
             <a href="{% url 'round_overview' row.round.id %}" class="btn {% if row.is_submitted %}btn-outline-primary{% else %}btn-primary{% endif %}">
