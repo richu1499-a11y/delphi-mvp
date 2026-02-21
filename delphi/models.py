@@ -44,12 +44,12 @@ class Item(models.Model):
     item_type = models.CharField(max_length=20, choices=SCALE_CHOICES, default="likert5")
 
     # Custom options for multiple choice questions
-    option_a = models.CharField(max_length=500, blank=True, help_text="Option A (for multiple choice)")
-    option_b = models.CharField(max_length=500, blank=True, help_text="Option B (for multiple choice)")
-    option_c = models.CharField(max_length=500, blank=True, help_text="Option C (for multiple choice)")
-    option_d = models.CharField(max_length=500, blank=True, help_text="Option D (for multiple choice)")
-    option_e = models.CharField(max_length=500, blank=True, help_text="Option E (for multiple choice)")
-    option_f = models.CharField(max_length=500, blank=True, help_text="Option F (for multiple choice)")
+    option_a = models.CharField(max_length=5000, blank=True, help_text="Option A (for multiple choice)")
+    option_b = models.CharField(max_length=5000, blank=True, help_text="Option B (for multiple choice)")
+    option_c = models.CharField(max_length=5000, blank=True, help_text="Option C (for multiple choice)")
+    option_d = models.CharField(max_length=5000, blank=True, help_text="Option D (for multiple choice)")
+    option_e = models.CharField(max_length=5000, blank=True, help_text="Option E (for multiple choice)")
+    option_f = models.CharField(max_length=5000, blank=True, help_text="Option F (for multiple choice)")
 
     # For matrix questions - stores JSON list of row labels
     matrix_rows = models.TextField(blank=True, help_text="JSON list of row labels for matrix questions")
