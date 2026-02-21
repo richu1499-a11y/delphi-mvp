@@ -16,8 +16,35 @@ def _require_panelist(request):
 
 
 def home(request):
+    # Handle token login form submission
+    if request.method == "POST":
+        token = request.POST.get("token", "").strip()
+        if token:
+            # Clean up the token - extract UUID if they pasted the full URL
+            if "/login/" in token:
+                # Extract token from URL like https://delphi-mvp.onrender.com/login/xxxx-xxxx/
+                import re
+                match = re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', token, re.I)
+                if match:
+                    token = match.group(0)
+            
+            # Try to find the panelist
+            try:
+                from uuid import UUID
+                token_uuid = UUID(token)
+                panelist = Panelist.objects.filter(token=token_uuid, is_active=True).first()
+                if panelist:
+                    request.session["panelist_id"] = panelist.id
+                    messages.success(request, f"Welcome, {panelist.name or panelist.email}!")
+                    return redirect("dashboard")
+                else:
+                    messages.error(request, "Invalid token. Please check and try again.")
+            except (ValueError, AttributeError):
+                messages.error(request, "Invalid token format. Please enter a valid access token.")
+        else:
+            messages.error(request, "Please enter your access token.")
+    
     return render(request, "delphi/home.html")
-
 
 def dashboard(request):
     panelist = _require_panelist(request)

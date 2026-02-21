@@ -3,25 +3,70 @@
 {% block title %}Welcome — PEP Delphi Consensus Study{% endblock %}
 
 {% block content %}
-<div class="card mb-4">
-  <div class="card-body text-center py-5">
-    <div class="icon-circle icon-circle-primary mx-auto mb-4" style="width: 5rem; height: 5rem; font-size: 2.5rem;">
-      <i class="bi bi-clipboard2-pulse"></i>
+<div class="row">
+  <!-- Left Column: Login Form -->
+  <div class="col-lg-5 mb-4">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Panelist Login</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-4">Enter your access token or paste your login link to access the survey.</p>
+        
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="token" class="form-label fw-bold">Access Token</label>
+            <input 
+              type="text" 
+              class="form-control form-control-lg" 
+              id="token" 
+              name="token" 
+              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              style="font-family: monospace;"
+              required
+            >
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              You can paste your full login link or just the token.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            <i class="bi bi-arrow-right-circle me-2"></i>Access Survey
+          </button>
+        </form>
+        
+        <hr class="my-4">
+        
+        <div class="text-center">
+          <p class="text-muted small mb-0">
+            <i class="bi bi-envelope me-1"></i>
+            Don't have a token? Contact the study administrator.
+          </p>
+        </div>
+      </div>
     </div>
-    <h2 class="mb-3">Welcome to the PEP Delphi Consensus Study</h2>
-    <p class="lead text-muted mb-4" style="max-width: 700px; margin: 0 auto;">
-      This study aims to establish expert consensus on standardizing post-ERCP pancreatitis definitions, 
-      outcome measures, and research priorities through a structured Delphi methodology.
-    </p>
-    <hr class="my-4" style="max-width: 100px; margin: 0 auto;">
-    <p class="text-muted">
-      <i class="bi bi-envelope me-2"></i>
-      Please use the personalized link from your invitation email to access the survey.
-    </p>
+  </div>
+  
+  <!-- Right Column: About -->
+  <div class="col-lg-7 mb-4">
+    <div class="card h-100">
+      <div class="card-body text-center py-5">
+        <div class="icon-circle icon-circle-primary mx-auto mb-4" style="width: 5rem; height: 5rem; font-size: 2.5rem;">
+          <i class="bi bi-clipboard2-pulse"></i>
+        </div>
+        <h2 class="mb-3">PEP Delphi Consensus Study</h2>
+        <p class="lead text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
+          Establishing expert consensus on standardizing post-ERCP pancreatitis definitions, 
+          outcome measures, and research priorities.
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="row g-4">
+<!-- Features Row -->
+<div class="row g-4 mb-4">
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-body text-center p-4">
@@ -57,7 +102,8 @@
   </div>
 </div>
 
-<div class="card mt-4">
+<!-- About Section -->
+<div class="card">
   <div class="card-header">
     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About This Study</h5>
   </div>
