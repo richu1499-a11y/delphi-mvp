@@ -90,7 +90,7 @@ class Panelist(models.Model):
     is_active = models.BooleanField(default=True)
     
     # Permanent access token - auto-generated, never expires
-    token = models.UUIDField(default=uuid.uuid4, unique=True, null=True, blank=True)
+    token = models.UUIDField(default=uuid.uuid4, null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
 
