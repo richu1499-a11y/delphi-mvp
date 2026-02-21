@@ -1,183 +1,519 @@
-{% extends "delphi/base.html" %}
-
-{% block title %}Survey Item — Round {{ round_item.round.number }}{% endblock %}
+{% extends 'delphi/base.html' %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'round_overview' round_item.round.id %}">Round {{ round_item.round.number }}</a></li>
-    <li class="breadcrumb-item active">Survey Item</li>
-  </ol>
-</nav>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
 
-<!-- Item Card -->
-<div class="card mb-4">
-  <div class="card-header">
-    <div class="d-flex align-items-center">
-      <div class="icon-circle icon-circle-primary me-3" style="background-color: rgba(255,255,255,0.2);">
-        <i class="bi bi-chat-square-text text-white"></i>
-      </div>
-      <div>
-        <h5 class="mb-0">Survey Item</h5>
-        <small class="opacity-75">Round {{ round_item.round.number }}</small>
-      </div>
+            <!-- Progress indicator -->
+            <div class="mb-4">
+                <small class="text-muted">Question {{ round_item.order }} of {{ total_items }}</small>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         style="width: {{ progress_percent }}%;"
+                         aria-valuenow="{{ progress_percent }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Question {{ round_item.order }}</h5>
+                </div>
+                <div class="card-body p-4">
+
+                    <!-- Question Prompt -->
+                    <h4 class="mb-4">{{ round_item.item.prompt }}</h4>
+
+                    <form method="post" id="response-form">
+                        {% csrf_token %}
+
+                        {% if round_item.item.item_type == 'likert5' %}
+                        <!-- LIKERT 5-POINT SCALE -->
+                        <div class="likert-scale-container mb-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div class="likert-option text-center">
+                                    <input type="radio" name="value" value="1" id="likert1"
+                                           class="btn-check" {% if current_value == '1' %}checked{% endif %}>
+                                    <label class="btn btn-outline-danger likert-btn" for="likert1">
+                                        <div class="likert-circle" style="background-color: #dc3545;">
+                                            <span class="likert-number">1</span>
+                                        </div>
+                                    </label>
+                                    <div class="likert-label mt-2">
+                                        <small><strong>Definitely<br>Disagree</strong></small>
+                                    </div>
+                                </div>
+                                <div class="likert-option text-center">
+                                    <input type="radio" name="value" value="2" id="likert2"
+                                           class="btn-check" {% if current_value == '2' %}checked{% endif %}>
+                                    <label class="btn btn-outline-warning likert-btn" for="likert2">
+                                        <div class="likert-circle" style="background-color: #fd7e14;">
+                                            <span class="likert-number">2</span>
+                                        </div>
+                                    </label>
+                                    <div class="likert-label mt-2">
+                                        <small><strong>Disagree</strong></small>
+                                    </div>
+                                </div>
+                                <div class="likert-option text-center">
+                                    <input type="radio" name="value" value="3" id="likert3"
+                                           class="btn-check" {% if current_value == '3' %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary likert-btn" for="likert3">
+                                        <div class="likert-circle" style="background-color: #6c757d;">
+                                            <span class="likert-number">3</span>
+                                        </div>
+                                    </label>
+                                    <div class="likert-label mt-2">
+                                        <small><strong>Neutral /<br>I don't know</strong></small>
+                                    </div>
+                                </div>
+                                <div class="likert-option text-center">
+                                    <input type="radio" name="value" value="4" id="likert4"
+                                           class="btn-check" {% if current_value == '4' %}checked{% endif %}>
+                                    <label class="btn btn-outline-info likert-btn" for="likert4">
+                                        <div class="likert-circle" style="background-color: #17a2b8;">
+                                            <span class="likert-number">4</span>
+                                        </div>
+                                    </label>
+                                    <div class="likert-label mt-2">
+                                        <small><strong>Agree</strong></small>
+                                    </div>
+                                </div>
+                                <div class="likert-option text-center">
+                                    <input type="radio" name="value" value="5" id="likert5"
+                                           class="btn-check" {% if current_value == '5' %}checked{% endif %}>
+                                    <label class="btn btn-outline-success likert-btn" for="likert5">
+                                        <div class="likert-circle" style="background-color: #28a745;">
+                                            <span class="likert-number">5</span>
+                                        </div>
+                                    </label>
+                                    <div class="likert-label mt-2">
+                                        <small><strong>Definitely<br>Agree</strong></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="likert-bar mt-3">
+                                <div class="likert-gradient"></div>
+                            </div>
+                        </div>
+
+                        {% elif round_item.item.item_type == 'yesno' %}
+                        <!-- YES/NO -->
+                        <div class="row justify-content-center mb-4">
+                            <div class="col-auto">
+                                <div class="btn-group btn-group-lg" role="group">
+                                    <input type="radio" name="value" value="yes" id="yes"
+                                           class="btn-check" {% if current_value == 'yes' %}checked{% endif %}>
+                                    <label class="btn btn-outline-success px-5 py-3" for="yes">Yes</label>
+                                    <input type="radio" name="value" value="no" id="no"
+                                           class="btn-check" {% if current_value == 'no' %}checked{% endif %}>
+                                    <label class="btn btn-outline-danger px-5 py-3" for="no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% elif round_item.item.item_type == 'multiple' %}
+                        <!-- MULTIPLE CHOICE WITH OTHER OPTION -->
+                        <div class="multiple-choice-container mb-4">
+                            {% if round_item.item.option_a %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="A"
+                                       id="optionA" {% if selected_option == 'A' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionA">
+                                    <strong class="text-primary">A.</strong> {{ round_item.item.option_a }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_b %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="B"
+                                       id="optionB" {% if selected_option == 'B' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionB">
+                                    <strong class="text-primary">B.</strong> {{ round_item.item.option_b }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_c %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="C"
+                                       id="optionC" {% if selected_option == 'C' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionC">
+                                    <strong class="text-primary">C.</strong> {{ round_item.item.option_c }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_d %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="D"
+                                       id="optionD" {% if selected_option == 'D' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionD">
+                                    <strong class="text-primary">D.</strong> {{ round_item.item.option_d }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_e %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="E"
+                                       id="optionE" {% if selected_option == 'E' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionE">
+                                    <strong class="text-primary">E.</strong> {{ round_item.item.option_e }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_f %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input mc-option" type="radio" name="selected_option" value="F"
+                                       id="optionF" {% if selected_option == 'F' %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="optionF">
+                                    <strong class="text-primary">F.</strong> {{ round_item.item.option_f }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Other Text Box (appears when "Other" option is selected) -->
+                            <div id="other-text-container" class="mt-3" style="display: none;">
+                                <label class="form-label"><strong>Please specify:</strong></label>
+                                <textarea class="form-control" id="other-text" name="other_text" rows="3" 
+                                          placeholder="Please enter your response here...">{{ other_text|default:'' }}</textarea>
+                            </div>
+                            
+                            <!-- Hidden field to store the combined value -->
+                            <input type="hidden" name="value" id="mc-value" value="{{ current_value|default:'' }}">
+                        </div>
+
+                        {% elif round_item.item.item_type == 'checkbox' %}
+                        <!-- CHECKBOX (Select Multiple) -->
+                        <div class="checkbox-container mb-4">
+                            <p class="text-muted mb-3"><em>Select all that apply:</em></p>
+                            {% if round_item.item.option_a %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="A"
+                                       id="checkA" {% if 'A' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkA">
+                                    {{ round_item.item.option_a }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_b %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="B"
+                                       id="checkB" {% if 'B' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkB">
+                                    {{ round_item.item.option_b }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_c %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="C"
+                                       id="checkC" {% if 'C' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkC">
+                                    {{ round_item.item.option_c }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_d %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="D"
+                                       id="checkD" {% if 'D' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkD">
+                                    {{ round_item.item.option_d }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_e %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="E"
+                                       id="checkE" {% if 'E' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkE">
+                                    {{ round_item.item.option_e }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if round_item.item.option_f %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="F"
+                                       id="checkF" {% if 'F' in current_value %}checked{% endif %}>
+                                <label class="form-check-label ms-2" for="checkF">
+                                    {{ round_item.item.option_f }}
+                                </label>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Other Text Box for Checkbox -->
+                            <div id="cb-other-text-container" class="mt-3" style="display: none;">
+                                <label class="form-label"><strong>Please specify "Other":</strong></label>
+                                <textarea class="form-control" id="cb-other-text" name="cb_other_text" rows="3" 
+                                          placeholder="Please enter your response here...">{{ cb_other_text|default:'' }}</textarea>
+                            </div>
+                            
+                            <input type="hidden" name="value" id="cb-value" value="{{ current_value|default:'' }}">
+                        </div>
+
+                        {% elif round_item.item.item_type == 'matrix' %}
+                        <!-- MATRIX (Checkbox Grid) -->
+                        <div class="matrix-container mb-4">
+                            <p class="text-muted mb-3"><em>For each factor, select the appropriate classification:</em></p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover matrix-table">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th class="factor-column">Factor</th>
+                                            {% for col in matrix_columns %}
+                                            <th class="text-center column-header">{{ col }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in matrix_rows %}
+                                        <tr>
+                                            <td class="factor-cell">{{ row }}</td>
+                                            {% for col in matrix_columns %}
+                                            <td class="text-center checkbox-cell">
+                                                <input type="checkbox" 
+                                                       class="form-check-input matrix-checkbox"
+                                                       data-row="{{ row }}"
+                                                       data-col="{{ col }}">
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <input type="hidden" name="value" id="matrix-value" value="{{ current_value|default:'{}' }}">
+                        </div>
+
+                        {% elif round_item.item.item_type == 'text' %}
+                        <!-- FREE TEXT -->
+                        <div class="mb-4">
+                            <textarea class="form-control" name="value" rows="5"
+                                      placeholder="Please enter your response here...">{{ current_value|default:'' }}</textarea>
+                        </div>
+
+                        {% endif %}
+
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            {% if prev_item %}
+                            <a href="{% url 'item_detail' prev_item.id %}" class="btn btn-outline-secondary">
+                                Previous
+                            </a>
+                            {% else %}
+                            <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-secondary">
+                                Back to Overview
+                            </a>
+                            {% endif %}
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                Save & Continue
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
-  <div class="card-body">
-    <!-- Question Box -->
-    <div class="question-box">
-      <p>{{ round_item.item.prompt }}</p>
-    </div>
-    
-    {% if locked %}
-      <div class="alert alert-success d-flex align-items-center">
-        <i class="bi bi-lock me-3 fs-4"></i>
-        <div>
-          <strong>Round Submitted</strong><br>
-          <small>This round is locked. You can view but not edit your response.</small>
-        </div>
-      </div>
-    {% endif %}
-    
-    {% if response %}
-      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
-        <div class="icon-circle icon-circle-success me-3">
-          <i class="bi bi-check-lg"></i>
-        </div>
-        <div>
-          <small class="text-muted d-block">Your Current Response</small>
-          <strong class="fs-5">
-            {% if round_item.item.item_type == 'multiple' %}
-              {% for key, label in round_item.item.get_options %}
-                {% if response.value == key %}{{ key }}. {{ label }}{% endif %}
-              {% endfor %}
-            {% elif round_item.item.item_type == 'likert5' %}
-              {% if response.value == '1' %}1 - Strongly Disagree
-              {% elif response.value == '2' %}2 - Disagree
-              {% elif response.value == '3' %}3 - Neutral
-              {% elif response.value == '4' %}4 - Agree
-              {% elif response.value == '5' %}5 - Strongly Agree
-              {% else %}{{ response.value }}{% endif %}
-            {% else %}
-              {{ response.value }}
-            {% endif %}
-          </strong>
-        </div>
-      </div>
-    {% endif %}
-    
-    {% if not locked %}
-      <form method="post">
-        {% csrf_token %}
-        
-        {% if round_item.item.item_type == 'likert5' %}
-          <label class="form-label fw-bold mb-3">Please indicate your level of agreement:</label>
-          <div class="likert-scale">
-            <div class="likert-option">
-              <input type="radio" name="value" id="likert1" value="1" {% if response and response.value == '1' %}checked{% endif %} required>
-              <label for="likert1">
-                <span class="likert-number">1</span>
-                <span class="likert-label">Strongly<br>Disagree</span>
-              </label>
-            </div>
-            <div class="likert-option">
-              <input type="radio" name="value" id="likert2" value="2" {% if response and response.value == '2' %}checked{% endif %} required>
-              <label for="likert2">
-                <span class="likert-number">2</span>
-                <span class="likert-label">Disagree</span>
-              </label>
-            </div>
-            <div class="likert-option">
-              <input type="radio" name="value" id="likert3" value="3" {% if response and response.value == '3' %}checked{% endif %} required>
-              <label for="likert3">
-                <span class="likert-number">3</span>
-                <span class="likert-label">Neutral</span>
-              </label>
-            </div>
-            <div class="likert-option">
-              <input type="radio" name="value" id="likert4" value="4" {% if response and response.value == '4' %}checked{% endif %} required>
-              <label for="likert4">
-                <span class="likert-number">4</span>
-                <span class="likert-label">Agree</span>
-              </label>
-            </div>
-            <div class="likert-option">
-              <input type="radio" name="value" id="likert5" value="5" {% if response and response.value == '5' %}checked{% endif %} required>
-              <label for="likert5">
-                <span class="likert-number">5</span>
-                <span class="likert-label">Strongly<br>Agree</span>
-              </label>
-            </div>
-          </div>
-          
-        {% elif round_item.item.item_type == 'yesno' %}
-          <label class="form-label fw-bold mb-3">Please select your answer:</label>
-          <div class="d-flex gap-3">
-            <div class="form-check">
-              <input class="btn-check" type="radio" name="value" id="yes" value="yes" {% if response and response.value == "yes" %}checked{% endif %} required>
-              <label class="btn btn-outline-success btn-lg px-5 py-3" for="yes">
-                <i class="bi bi-check-circle me-2"></i>Yes
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="btn-check" type="radio" name="value" id="no" value="no" {% if response and response.value == "no" %}checked{% endif %} required>
-              <label class="btn btn-outline-danger btn-lg px-5 py-3" for="no">
-                <i class="bi bi-x-circle me-2"></i>No
-              </label>
-            </div>
-          </div>
-          
-        {% elif round_item.item.item_type == 'multiple' %}
-          <label class="form-label fw-bold mb-3">Please select one option:</label>
-          <div class="d-grid gap-2">
-            {% for key, label in round_item.item.get_options %}
-              <div class="form-check">
-                <input class="btn-check" type="radio" name="value" id="option{{ key }}" value="{{ key }}" {% if response and response.value == key %}checked{% endif %} required>
-                <label class="btn btn-outline-primary btn-lg text-start w-100 py-3" for="option{{ key }}">
-                  <span class="badge bg-primary me-2">{{ key }}</span>
-                  {{ label }}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-          
-        {% else %}
-          <label class="form-label fw-bold mb-3">Please provide your response:</label>
-          <textarea name="value" class="form-control" rows="5" placeholder="Enter your response here..." required>{% if response %}{{ response.value }}{% endif %}</textarea>
-        {% endif %}
-        
-        <div class="d-flex gap-3 mt-4">
-          <button type="submit" class="btn btn-primary btn-lg">
-            <i class="bi bi-check-lg me-2"></i>Save Response
-          </button>
-          <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-arrow-left me-2"></i>Back to Round
-          </a>
-        </div>
-      </form>
-    {% endif %}
-  </div>
 </div>
 
-<!-- Feedback Section -->
-{% if feedback_allowed and aggregate and round_item.item.item_type == 'likert5' %}
-  <div class="card">
-    <div class="card-header" style="background: linear-gradient(135deg, #0A8043 0%, #0D9D4F 100%);">
-      <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Group Feedback</h5>
-    </div>
-    <div class="card-body">
-      <div class="d-flex align-items-center">
-        <div class="icon-circle icon-circle-success me-3" style="width: 4rem; height: 4rem; font-size: 1.5rem;">
-          <i class="bi bi-people"></i>
-        </div>
-        <div>
-          <small class="text-muted d-block">Average Rating (Mean)</small>
-          <span class="display-5 fw-bold text-success">{{ aggregate.mean|floatformat:2 }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-{% endif %}
+<style>
+    .likert-scale-container { padding: 20px 0; }
+    .likert-option { flex: 1; min-width: 80px; max-width: 120px; padding: 10px 5px; }
+    .likert-btn { width: 70px; height: 70px; border-radius: 50% !important; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .likert-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .likert-number { color: white; font-size: 1.5rem; font-weight: bold; }
+    .btn-check:checked + .likert-btn { transform: scale(1.15); box-shadow: 0 0 15px rgba(0, 45, 114, 0.4); }
+    .likert-label { font-size: 0.75rem; line-height: 1.2; min-height: 40px; }
+    .likert-bar { height: 8px; border-radius: 4px; overflow: hidden; }
+    .likert-gradient { height: 100%; background: linear-gradient(to right, #dc3545 0%, #fd7e14 25%, #6c757d 50%, #17a2b8 75%, #28a745 100%); }
+    .option-card { transition: all 0.2s ease; cursor: pointer; }
+    .option-card:hover { background-color: #f8f9fa; border-color: #002D72 !important; }
+    .option-card:has(.form-check-input:checked) { background-color: #e7f1ff; border-color: #002D72 !important; border-width: 2px; }
+    .matrix-table { font-size: 0.9rem; }
+    .matrix-table th { font-weight: 600; vertical-align: middle; }
+    .factor-column { width: 40%; min-width: 250px; }
+    .column-header { width: 10%; min-width: 80px; font-size: 0.8rem; }
+    .factor-cell { font-weight: 500; background-color: #f8f9fa; }
+    .checkbox-cell { vertical-align: middle; }
+    .matrix-checkbox { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+    .matrix-checkbox:checked { background-color: #002D72; border-color: #002D72; }
+    .matrix-table tbody tr:hover { background-color: #e7f1ff; }
+    #other-text-container, #cb-other-text-container { 
+        padding: 15px; 
+        background-color: #f8f9fa; 
+        border: 1px solid #dee2e6; 
+        border-radius: 5px; 
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ========================================
+    // MULTIPLE CHOICE WITH "OTHER" OPTION
+    // ========================================
+    var mcOptions = document.querySelectorAll('.mc-option');
+    var otherTextContainer = document.getElementById('other-text-container');
+    var otherText = document.getElementById('other-text');
+    var mcValue = document.getElementById('mc-value');
+    
+    if (mcOptions.length > 0 && mcValue) {
+        // Check if current value contains "Other:" to pre-populate
+        var currentVal = mcValue.value || '';
+        if (currentVal.startsWith('Other:')) {
+            // Find and check the "Other" option
+            mcOptions.forEach(function(opt) {
+                var label = opt.closest('.option-card').querySelector('.form-check-label');
+                if (label && label.textContent.toLowerCase().includes('other')) {
+                    opt.checked = true;
+                    if (otherTextContainer) otherTextContainer.style.display = 'block';
+                    if (otherText) otherText.value = currentVal.replace('Other:', '').trim();
+                }
+            });
+        } else {
+            // Pre-select the saved option
+            mcOptions.forEach(function(opt) {
+                if (opt.value === currentVal) {
+                    opt.checked = true;
+                }
+            });
+        }
+        
+        // Show/hide "Other" text box based on selection
+        mcOptions.forEach(function(opt) {
+            opt.addEventListener('change', function() {
+                var label = this.closest('.option-card').querySelector('.form-check-label');
+                var labelText = label ? label.textContent.toLowerCase() : '';
+                
+                if (labelText.includes('other') && this.checked) {
+                    if (otherTextContainer) otherTextContainer.style.display = 'block';
+                } else {
+                    if (otherTextContainer) otherTextContainer.style.display = 'none';
+                    if (otherText) otherText.value = '';
+                }
+            });
+        });
+        
+        // Check on page load if "Other" is already selected
+        mcOptions.forEach(function(opt) {
+            if (opt.checked) {
+                var label = opt.closest('.option-card').querySelector('.form-check-label');
+                var labelText = label ? label.textContent.toLowerCase() : '';
+                if (labelText.includes('other')) {
+                    if (otherTextContainer) otherTextContainer.style.display = 'block';
+                }
+            }
+        });
+        
+        // Update hidden field before submit
+        document.getElementById('response-form').addEventListener('submit', function(e) {
+            var selectedOption = document.querySelector('.mc-option:checked');
+            if (selectedOption) {
+                var label = selectedOption.closest('.option-card').querySelector('.form-check-label');
+                var labelText = label ? label.textContent.toLowerCase() : '';
+                
+                if (labelText.includes('other') && otherText && otherText.value.trim()) {
+                    mcValue.value = 'Other: ' + otherText.value.trim();
+                } else {
+                    mcValue.value = selectedOption.value;
+                }
+            }
+        });
+    }
+    
+    // ========================================
+    // CHECKBOX WITH "OTHER" OPTION
+    // ========================================
+    var cbOptions = document.querySelectorAll('.cb-option');
+    var cbOtherTextContainer = document.getElementById('cb-other-text-container');
+    var cbOtherText = document.getElementById('cb-other-text');
+    var cbValue = document.getElementById('cb-value');
+    
+    if (cbOptions.length > 0 && cbValue) {
+        // Show/hide "Other" text box based on selection
+        cbOptions.forEach(function(opt) {
+            opt.addEventListener('change', function() {
+                var label = this.closest('.option-card').querySelector('.form-check-label');
+                var labelText = label ? label.textContent.toLowerCase() : '';
+                
+                if (labelText.includes('other')) {
+                    if (this.checked) {
+                        if (cbOtherTextContainer) cbOtherTextContainer.style.display = 'block';
+                    } else {
+                        if (cbOtherTextContainer) cbOtherTextContainer.style.display = 'none';
+                        if (cbOtherText) cbOtherText.value = '';
+                    }
+                }
+            });
+        });
+        
+        // Update hidden field before submit
+        document.getElementById('response-form').addEventListener('submit', function(e) {
+            var checkedOptions = document.querySelectorAll('.cb-option:checked');
+            var values = [];
+            checkedOptions.forEach(function(opt) {
+                var label = opt.closest('.option-card').querySelector('.form-check-label');
+                var labelText = label ? label.textContent.toLowerCase() : '';
+                
+                if (labelText.includes('other') && cbOtherText && cbOtherText.value.trim()) {
+                    values.push('Other: ' + cbOtherText.value.trim());
+                } else {
+                    values.push(opt.value);
+                }
+            });
+            cbValue.value = values.join(',');
+        });
+    }
+    
+    // ========================================
+    // MATRIX QUESTIONS
+    // ========================================
+    var matrixValue = document.getElementById('matrix-value');
+    if (matrixValue) {
+        var data = {};
+        try { data = JSON.parse(matrixValue.value || '{}'); } catch(e) { data = {}; }
+        
+        // Pre-check saved values
+        document.querySelectorAll('.matrix-checkbox').forEach(function(cb) {
+            var row = cb.getAttribute('data-row');
+            var col = cb.getAttribute('data-col');
+            if (data[row] && data[row].indexOf(col) !== -1) {
+                cb.checked = true;
+            }
+        });
+        
+        // Update hidden field on change
+        document.querySelectorAll('.matrix-checkbox').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var newData = {};
+                document.querySelectorAll('.matrix-checkbox:checked').forEach(function(checked) {
+                    var row = checked.getAttribute('data-row');
+                    var col = checked.getAttribute('data-col');
+                    if (!newData[row]) newData[row] = [];
+                    newData[row].push(col);
+                });
+                matrixValue.value = JSON.stringify(newData);
+            });
+        });
+        
+        // Update before submit
+        document.getElementById('response-form').addEventListener('submit', function() {
+            var newData = {};
+            document.querySelectorAll('.matrix-checkbox:checked').forEach(function(checked) {
+                var row = checked.getAttribute('data-row');
+                var col = checked.getAttribute('data-col');
+                if (!newData[row]) newData[row] = [];
+                newData[row].push(col);
+            });
+            matrixValue.value = JSON.stringify(newData);
+        });
+    }
+});
+</script>
 {% endblock %}

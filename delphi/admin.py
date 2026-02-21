@@ -30,9 +30,14 @@ class ItemAdmin(admin.ModelAdmin):
             'fields': ('study', 'prompt', 'item_type')
         }),
         ('Multiple Choice Options', {
-            'fields': ('option_a', 'option_b', 'option_c', 'option_d', 'option_e'),
+            'fields': ('option_a', 'option_b', 'option_c', 'option_d', 'option_e', 'option_f'),
             'classes': ('collapse',),
-            'description': 'Only used when Item Type is "Multiple Choice"'
+            'description': 'Used for Multiple Choice and Checkbox question types'
+        }),
+        ('Matrix Question Settings', {
+            'fields': ('matrix_rows', 'matrix_columns'),
+            'classes': ('collapse',),
+            'description': 'Used for Matrix (checkbox grid) question types. Enter as JSON arrays.'
         }),
     )
     

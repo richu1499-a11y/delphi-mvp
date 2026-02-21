@@ -36,23 +36,31 @@ class Item(models.Model):
         ("yesno", "Yes/No"),
         ("multiple", "Multiple Choice (Custom Options)"),
         ("text", "Free text"),
+        ("matrix", "Matrix (Checkbox grid)"),
+        ("checkbox", "Checkbox (Select multiple)"),
     ]
     study = models.ForeignKey(Study, on_delete=models.CASCADE, related_name="items")
     prompt = models.TextField(help_text="The question or statement to present to panelists")
     item_type = models.CharField(max_length=20, choices=SCALE_CHOICES, default="likert5")
-    
+
     # Custom options for multiple choice questions
-    option_a = models.CharField(max_length=255, blank=True, help_text="Option A (for multiple choice)")
-    option_b = models.CharField(max_length=255, blank=True, help_text="Option B (for multiple choice)")
-    option_c = models.CharField(max_length=255, blank=True, help_text="Option C (for multiple choice)")
-    option_d = models.CharField(max_length=255, blank=True, help_text="Option D (for multiple choice)")
-    option_e = models.CharField(max_length=255, blank=True, help_text="Option E (for multiple choice)")
-    
+    option_a = models.CharField(max_length=500, blank=True, help_text="Option A (for multiple choice)")
+    option_b = models.CharField(max_length=500, blank=True, help_text="Option B (for multiple choice)")
+    option_c = models.CharField(max_length=500, blank=True, help_text="Option C (for multiple choice)")
+    option_d = models.CharField(max_length=500, blank=True, help_text="Option D (for multiple choice)")
+    option_e = models.CharField(max_length=500, blank=True, help_text="Option E (for multiple choice)")
+    option_f = models.CharField(max_length=500, blank=True, help_text="Option F (for multiple choice)")
+
+    # For matrix questions - stores JSON list of row labels
+    matrix_rows = models.TextField(blank=True, help_text="JSON list of row labels for matrix questions")
+    # For matrix questions - stores JSON list of column headers
+    matrix_columns = models.TextField(blank=True, help_text="JSON list of column headers for matrix questions")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"[{self.study.name}] {self.prompt[:50]}..."
-    
+
     def get_options(self):
         """Returns a list of non-empty options for multiple choice questions."""
         options = []
@@ -66,8 +74,23 @@ class Item(models.Model):
             options.append(('D', self.option_d))
         if self.option_e:
             options.append(('E', self.option_e))
+        if self.option_f:
+            options.append(('F', self.option_f))
         return options
 
+    def get_matrix_rows(self):
+        """Returns list of row labels for matrix questions."""
+        import json
+        if self.matrix_rows:
+            return json.loads(self.matrix_rows)
+        return []
+
+    def get_matrix_columns(self):
+        """Returns list of column headers for matrix questions."""
+        import json
+        if self.matrix_columns:
+            return json.loads(self.matrix_columns)
+        return []
 
 class RoundItem(models.Model):
     round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="round_items")

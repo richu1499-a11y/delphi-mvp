@@ -46,6 +46,7 @@ def home(request):
     
     return render(request, "delphi/home.html")
 
+
 def dashboard(request):
     panelist = _require_panelist(request)
     if not panelist:
@@ -156,7 +157,43 @@ def item_detail(request, round_item_id):
             messages.error(request, "This round has been submitted. Responses are locked.")
             return redirect("round_overview", round_id=round_obj.id)
 
-        value = request.POST.get("value", "").strip()
+        # Get the value based on question type
+        if ri.item.item_type == 'checkbox':
+            values = request.POST.getlist("checkbox_value")
+            other_text = request.POST.get("cb_other_text", "").strip()
+            
+            # Replace "Other" value with actual text if provided
+            final_values = []
+            for v in values:
+                label = ""
+                if v == "A" and ri.item.option_a:
+                    label = ri.item.option_a.lower()
+                elif v == "B" and ri.item.option_b:
+                    label = ri.item.option_b.lower()
+                elif v == "C" and ri.item.option_c:
+                    label = ri.item.option_c.lower()
+                elif v == "D" and ri.item.option_d:
+                    label = ri.item.option_d.lower()
+                elif v == "E" and ri.item.option_e:
+                    label = ri.item.option_e.lower()
+                elif v == "F" and ri.item.option_f:
+                    label = ri.item.option_f.lower()
+                
+                if "other" in label and other_text:
+                    final_values.append(f"Other: {other_text}")
+                else:
+                    final_values.append(v)
+            value = ",".join(final_values) if final_values else ""
+            
+        elif ri.item.item_type == 'multiple':
+            value = request.POST.get("value", "").strip()
+            
+        elif ri.item.item_type == 'matrix':
+            value = request.POST.get("value", "").strip()
+            
+        else:
+            value = request.POST.get("value", "").strip()
+
         if not value:
             messages.error(request, "Please provide a response.")
         else:
@@ -165,7 +202,15 @@ def item_detail(request, round_item_id):
             )
             messages.success(request, "Saved.")
 
-        return redirect("round_overview", round_id=round_obj.id)
+        # Navigate to next item or back to overview
+        all_items = list(round_obj.round_items.order_by('order'))
+        current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), -1)
+        
+        if current_index < len(all_items) - 1:
+            next_item = all_items[current_index + 1]
+            return redirect("item_detail", round_item_id=next_item.id)
+        else:
+            return redirect("round_overview", round_id=round_obj.id)
 
     feedback_allowed = True
     if round_obj.number == 1 and not round_obj.show_feedback_immediately:
@@ -175,6 +220,65 @@ def item_detail(request, round_item_id):
     agg = None
     if feedback_allowed and ri.item.item_type == "likert5":
         agg = Response.objects.filter(round_item=ri).aggregate(mean=Avg("value"))
+
+    # Get all items for navigation and progress
+    all_items = list(round_obj.round_items.order_by('order'))
+    total_items = len(all_items)
+    current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), 0)
+    progress_percent = int((current_index / total_items) * 100) if total_items > 0 else 0
+
+    # Previous and next items
+    prev_item = all_items[current_index - 1] if current_index > 0 else None
+    next_item = all_items[current_index + 1] if current_index < len(all_items) - 1 else None
+
+    # Get current value for pre-filling form
+    current_value = resp.value if resp else ""
+    
+    # Parse current value for multiple choice with "Other"
+    selected_option = ""
+    other_text = ""
+    if ri.item.item_type == 'multiple' and current_value:
+        if current_value.startswith("Other:"):
+            other_text = current_value.replace("Other:", "").strip()
+            # Find which option is "Other"
+            if ri.item.option_a and "other" in ri.item.option_a.lower():
+                selected_option = "A"
+            elif ri.item.option_b and "other" in ri.item.option_b.lower():
+                selected_option = "B"
+            elif ri.item.option_c and "other" in ri.item.option_c.lower():
+                selected_option = "C"
+            elif ri.item.option_d and "other" in ri.item.option_d.lower():
+                selected_option = "D"
+            elif ri.item.option_e and "other" in ri.item.option_e.lower():
+                selected_option = "E"
+            elif ri.item.option_f and "other" in ri.item.option_f.lower():
+                selected_option = "F"
+        else:
+            selected_option = current_value
+    
+    # Parse current value for checkbox with "Other"
+    cb_other_text = ""
+    if ri.item.item_type == 'checkbox' and current_value:
+        parts = current_value.split(",")
+        for part in parts:
+            if part.startswith("Other:"):
+                cb_other_text = part.replace("Other:", "").strip()
+                break
+
+    # For matrix questions, get rows and columns
+    matrix_rows = []
+    matrix_columns = []
+    current_matrix_value = {}
+    
+    if ri.item.item_type == 'matrix':
+        matrix_rows = ri.item.get_matrix_rows()
+        matrix_columns = ri.item.get_matrix_columns()
+        if current_value:
+            import json
+            try:
+                current_matrix_value = json.loads(current_value)
+            except json.JSONDecodeError:
+                current_matrix_value = {}
 
     return render(
         request,
@@ -187,6 +291,17 @@ def item_detail(request, round_item_id):
             "feedback_allowed": feedback_allowed,
             "locked": locked,
             "submitted": submitted,
+            "total_items": total_items,
+            "progress_percent": progress_percent,
+            "prev_item": prev_item,
+            "next_item": next_item,
+            "current_value": current_value,
+            "selected_option": selected_option,
+            "other_text": other_text,
+            "cb_other_text": cb_other_text,
+            "matrix_rows": matrix_rows,
+            "matrix_columns": matrix_columns,
+            "current_matrix_value": current_matrix_value,
         },
     )
 
@@ -300,6 +415,43 @@ def run_migrations(request):
         return HttpResponse(
             f'{result}<br><br>'
             f'<strong>All done! Go to /admin/ to continue.</strong>'
+        )
+    
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        return HttpResponse(
+            f'<h3>Error:</h3>'
+            f'<p>{str(e)}</p>'
+            f'<h3>Details:</h3>'
+            f'<pre>{error_details}</pre>',
+            status=500
+        )
+
+
+# =============================================================================
+# LOAD QUESTIONS TO PRODUCTION
+# =============================================================================
+def load_questions_view(request):
+    """One-time view to load questions into production database"""
+    secret_key = request.GET.get('key')
+    
+    if secret_key != 'delphi2024secret':
+        return HttpResponse('Not authorized', status=403)
+    
+    from django.core.management import call_command
+    from io import StringIO
+    
+    try:
+        out = StringIO()
+        call_command('load_questions', stdout=out)
+        output = out.getvalue()
+        
+        return HttpResponse(
+            f'<h3>Questions Loaded Successfully!</h3>'
+            f'<pre>{output}</pre>'
+            f'<br><br>'
+            f'<strong>Go to /admin/ to verify the questions.</strong>'
         )
     
     except Exception as e:
