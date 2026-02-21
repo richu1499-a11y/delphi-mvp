@@ -164,6 +164,27 @@ def item_detail(request, round_item_id):
     )
 
 
+# =============================================================================
+# NEW: Simple Token Login (replaces magic links)
+# =============================================================================
+def token_login(request, token):
+    """Login using the panelist's permanent token."""
+    panelist = get_object_or_404(Panelist, token=token)
+    
+    if not panelist.is_active:
+        messages.error(request, "Your account has been deactivated. Please contact the study administrator.")
+        return redirect("home")
+    
+    # Log them in by storing panelist_id in session
+    request.session["panelist_id"] = panelist.id
+    
+    messages.success(request, f"Welcome, {panelist.name or panelist.email}!")
+    return redirect("dashboard")
+
+
+# =============================================================================
+# LEGACY: Magic Link Login (kept for backward compatibility)
+# =============================================================================
 def magic_login(request, token):
     magic = get_object_or_404(MagicLink, token=token)
     if not magic.is_valid():
@@ -181,7 +202,7 @@ def magic_login(request, token):
 
 def logout_view(request):
     request.session.flush()
-    messages.success(request, "Logged out.")
+    messages.success(request, "Logged out successfully.")
     return redirect("home")
 
 
@@ -219,10 +240,10 @@ def setup_admin(request):
 
 
 # =============================================================================
-# TEMPORARY MIGRATION RUNNER - DELETE AFTER USE!
+# TEMPORARY MIGRATION RUNNER
 # =============================================================================
 def run_migrations(request):
-    """One-time migration view - DELETE THIS AFTER USE"""
+    """One-time migration view"""
     secret_key = request.GET.get('key')
     
     if secret_key != 'delphi2024secret':

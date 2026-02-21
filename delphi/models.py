@@ -8,6 +8,9 @@ class Study(models.Model):
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "Studies"
+
     def __str__(self):
         return self.name
 
@@ -83,16 +86,26 @@ class Panelist(models.Model):
     study = models.ForeignKey(Study, on_delete=models.CASCADE, related_name="panelists")
     email = models.EmailField()
     name = models.CharField(max_length=255, blank=True)
+    institution = models.CharField(max_length=255, blank=True, help_text="Institution/Affiliation")
     is_active = models.BooleanField(default=True)
+    
+    # Permanent access token - auto-generated, never expires
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ("study", "email")
 
     def __str__(self):
-        return self.email
+        return f"{self.name} ({self.email})" if self.name else self.email
+    
+    def get_login_url(self):
+        """Returns the full login URL for this panelist."""
+        return f"/login/{self.token}/"
 
 
+# Keep MagicLink for backward compatibility, but we won't use it anymore
 class MagicLink(models.Model):
     panelist = models.ForeignKey(Panelist, on_delete=models.CASCADE, related_name="magic_links")
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -116,6 +129,7 @@ class Response(models.Model):
     round_item = models.ForeignKey(RoundItem, on_delete=models.CASCADE, related_name="responses")
     value = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("panelist", "round_item")
@@ -143,7 +157,11 @@ class FeedbackAggregate(models.Model):
     round_item = models.OneToOneField(RoundItem, on_delete=models.CASCADE, related_name="aggregate")
     mean = models.FloatField(null=True, blank=True)
     median = models.FloatField(null=True, blank=True)
+    std_dev = models.FloatField(null=True, blank=True)
     n = models.PositiveIntegerField(default=0)
+    pct_agree = models.FloatField(null=True, blank=True, help_text="Percentage of 4 or 5 ratings")
+    pct_disagree = models.FloatField(null=True, blank=True, help_text="Percentage of 1 or 2 ratings")
+    consensus_reached = models.BooleanField(default=False, help_text="True if >=75% agreement")
     computed_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
