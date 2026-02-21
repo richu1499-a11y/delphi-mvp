@@ -1,4 +1,5 @@
 {% extends 'delphi/base.html' %}
+{% load static %}
 
 {% block title %}Welcome — PEP Delphi Consensus Study{% endblock %}
 
@@ -12,16 +13,16 @@
       </div>
       <div class="card-body">
         <p class="text-muted mb-4">Enter your access token or paste your login link to access the survey.</p>
-        
+
         <form method="post">
           {% csrf_token %}
           <div class="mb-3">
             <label for="token" class="form-label fw-bold">Access Token</label>
-            <input 
-              type="text" 
-              class="form-control form-control-lg" 
-              id="token" 
-              name="token" 
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              id="token"
+              name="token"
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
               style="font-family: monospace;"
               required
@@ -35,9 +36,9 @@
             <i class="bi bi-arrow-right-circle me-2"></i>Access Survey
           </button>
         </form>
-        
+
         <hr class="my-4">
-        
+
         <div class="text-center">
           <p class="text-muted small mb-0">
             <i class="bi bi-envelope me-1"></i>
@@ -47,7 +48,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Right Column: About -->
   <div class="col-lg-7 mb-4">
     <div class="card h-100">
@@ -57,7 +58,7 @@
         </div>
         <h2 class="mb-3">PEP Delphi Consensus Study</h2>
         <p class="lead text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
-          Establishing expert consensus on standardizing post-ERCP pancreatitis definitions, 
+          Establishing expert consensus on standardizing post-ERCP pancreatitis definitions,
           outcome measures, and research priorities.
         </p>
       </div>
@@ -103,13 +104,13 @@
 </div>
 
 <!-- About Section -->
-<div class="card">
+<div class="card mb-4">
   <div class="card-header">
     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>About This Study</h5>
   </div>
   <div class="card-body">
     <p class="mb-3">
-      Post-ERCP pancreatitis (PEP) remains one of the most common and serious complications of endoscopic retrograde cholangiopancreatography. 
+      Post-ERCP pancreatitis (PEP) remains one of the most common and serious complications of endoscopic retrograde cholangiopancreatography.
       Despite extensive research, there is significant heterogeneity in how PEP is defined, measured, and reported across clinical trials.
     </p>
     <p class="mb-0">
@@ -123,4 +124,113 @@
     </ul>
   </div>
 </div>
+
+<!-- Study Team Section -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Study Team</h5>
+  </div>
+  <div class="card-body">
+    
+    <!-- Principal Investigator -->
+    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+      <i class="bi bi-star-fill me-2"></i>Principal Investigator
+    </h6>
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="text-center">
+          <img src="{% static 'images/akshintala-venkata-1528486594.png' %}" 
+               alt="Dr. Venkata Akshintala" 
+               class="rounded-circle mb-3 team-photo">
+          <h6 class="fw-bold mb-1">Venkata S. Akshintala, MBBS, MD</h6>
+          <p class="text-muted small mb-1">Associate Professor</p>
+          <p class="text-muted small mb-2">Division of Gastroenterology & Hepatology<br>Johns Hopkins University School of Medicine</p>
+          <a href="mailto:vakshin1@jhmi.edu" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-envelope me-1"></i>vakshin1@jhmi.edu
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study Coordinator -->
+    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+      <i class="bi bi-clipboard-check me-2"></i>Study Coordinator
+    </h6>
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="text-center">
+          <img src="{% static 'images/Richu Ravikumar Processed.jpg' %}" 
+               alt="Richu Ravikumar" 
+               class="rounded-circle mb-3 team-photo">
+          <h6 class="fw-bold mb-1">Richu Ravikumar</h6>
+          <p class="text-muted small mb-1">Post-Doctoral Research Fellow</p>
+          <p class="text-muted small mb-2">Division of Gastroenterology & Hepatology<br>Johns Hopkins University School of Medicine</p>
+          <a href="mailto:richu1499@outlook.com" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-envelope me-1"></i>richu1499@outlook.com
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steering Committee -->
+    <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
+      <i class="bi bi-diagram-3 me-2"></i>Steering Committee
+    </h6>
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="text-center">
+          <img src="{% static 'images/Erwin-Van-Geenen.png' %}" 
+               alt="Dr. Erwin Van Geenen" 
+               class="rounded-circle mb-3 team-photo">
+          <h6 class="fw-bold mb-1">Erwin Van Geenen, MD, PhD</h6>
+          <p class="text-muted small mb-2">Department of Gastroenterology & Hepatology<br>Radboud University Medical Center<br>Nijmegen, Netherlands</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="text-center">
+          <img src="{% static 'images/Christina-J-Sperna-Weiland (1).png' %}" 
+               alt="Dr. Christina J. Sperna Weiland" 
+               class="rounded-circle mb-3 team-photo">
+          <h6 class="fw-bold mb-1">Christina J. Sperna Weiland, MD</h6>
+          <p class="text-muted small mb-2">Department of Gastroenterology & Hepatology<br>Radboud University Medical Center<br>Nijmegen, Netherlands</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Institutional Affiliations -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Institutional Affiliations</h5>
+  </div>
+  <div class="card-body">
+    <div class="row align-items-center justify-content-center text-center">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <img src="{% static 'images/jhu_logo.jpg' %}" alt="Johns Hopkins University" style="max-height: 60px;" class="img-fluid">
+        <p class="text-muted small mt-2 mb-0">Johns Hopkins University<br>School of Medicine</p>
+      </div>
+      <div class="col-md-6">
+        <p class="fw-bold text-primary mb-1" style="font-size: 1.1rem;">Radboud University Medical Center</p>
+        <p class="text-muted small mb-0">Nijmegen, Netherlands</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .team-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 4px solid #002D72;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .team-photo:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+  }
+</style>
 {% endblock %}
