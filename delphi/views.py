@@ -152,66 +152,107 @@ def item_detail(request, round_item_id):
 
     resp = Response.objects.filter(panelist=panelist, round_item=ri).first()
 
+    # Get all items for navigation
+    all_items = list(round_obj.round_items.order_by('order'))
+    current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), -1)
+
     if request.method == "POST":
         if locked:
             messages.error(request, "This round has been submitted. Responses are locked.")
             return redirect("round_overview", round_id=round_obj.id)
 
+        value = None
+
         # Get the value based on question type
-        if ri.item.item_type == 'checkbox':
+        if ri.item.item_type == 'likert5':
+            value = request.POST.get("value", "").strip()
+
+        elif ri.item.item_type == 'yesno':
+            value = request.POST.get("value", "").strip()
+
+        elif ri.item.item_type == 'multiple':
+            value = request.POST.get("value", "").strip()
+            other_text = request.POST.get("other_text", "").strip()
+            # If "Other" option selected and text provided, combine them
+            if value and other_text:
+                option_text = ""
+                if value == "A" and ri.item.option_a:
+                    option_text = ri.item.option_a.lower()
+                elif value == "B" and ri.item.option_b:
+                    option_text = ri.item.option_b.lower()
+                elif value == "C" and ri.item.option_c:
+                    option_text = ri.item.option_c.lower()
+                elif value == "D" and ri.item.option_d:
+                    option_text = ri.item.option_d.lower()
+                elif value == "E" and ri.item.option_e:
+                    option_text = ri.item.option_e.lower()
+                elif value == "F" and ri.item.option_f:
+                    option_text = ri.item.option_f.lower()
+                
+                if "other" in option_text:
+                    value = f"Other: {other_text}"
+
+        elif ri.item.item_type == 'checkbox':
             values = request.POST.getlist("checkbox_value")
             other_text = request.POST.get("cb_other_text", "").strip()
             
-            # Replace "Other" value with actual text if provided
-            final_values = []
-            for v in values:
-                label = ""
-                if v == "A" and ri.item.option_a:
-                    label = ri.item.option_a.lower()
-                elif v == "B" and ri.item.option_b:
-                    label = ri.item.option_b.lower()
-                elif v == "C" and ri.item.option_c:
-                    label = ri.item.option_c.lower()
-                elif v == "D" and ri.item.option_d:
-                    label = ri.item.option_d.lower()
-                elif v == "E" and ri.item.option_e:
-                    label = ri.item.option_e.lower()
-                elif v == "F" and ri.item.option_f:
-                    label = ri.item.option_f.lower()
-                
-                if "other" in label and other_text:
-                    final_values.append(f"Other: {other_text}")
-                else:
-                    final_values.append(v)
-            value = ",".join(final_values) if final_values else ""
-            
-        elif ri.item.item_type == 'multiple':
-            value = request.POST.get("value", "").strip()
-            
+            if values:
+                final_values = []
+                for v in values:
+                    option_text = ""
+                    if v == "A" and ri.item.option_a:
+                        option_text = ri.item.option_a.lower()
+                    elif v == "B" and ri.item.option_b:
+                        option_text = ri.item.option_b.lower()
+                    elif v == "C" and ri.item.option_c:
+                        option_text = ri.item.option_c.lower()
+                    elif v == "D" and ri.item.option_d:
+                        option_text = ri.item.option_d.lower()
+                    elif v == "E" and ri.item.option_e:
+                        option_text = ri.item.option_e.lower()
+                    elif v == "F" and ri.item.option_f:
+                        option_text = ri.item.option_f.lower()
+                    
+                    if "other" in option_text and other_text:
+                        final_values.append(f"Other: {other_text}")
+                    else:
+                        final_values.append(v)
+                value = ",".join(final_values)
+            else:
+                value = ""
+
         elif ri.item.item_type == 'matrix':
             value = request.POST.get("value", "").strip()
-            
+            # For matrix, treat empty or {} as needing input
+            if value == "" or value == "{}":
+                value = ""
+
+        elif ri.item.item_type == 'text':
+            value = request.POST.get("value", "").strip()
+
         else:
             value = request.POST.get("value", "").strip()
 
-        if not value:
-            messages.error(request, "Please provide a response.")
-        else:
+        # Check if we have a valid response
+        if value:
+            # Save the response
             Response.objects.update_or_create(
                 panelist=panelist, round_item=ri, defaults={"value": value}
             )
             messages.success(request, "Saved.")
-
-        # Navigate to next item or back to overview
-        all_items = list(round_obj.round_items.order_by('order'))
-        current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), -1)
-        
-        if current_index < len(all_items) - 1:
-            next_item = all_items[current_index + 1]
-            return redirect("item_detail", round_item_id=next_item.id)
+            
+            # Navigate to next item or back to overview
+            if current_index < len(all_items) - 1:
+                next_item = all_items[current_index + 1]
+                return redirect("item_detail", round_item_id=next_item.id)
+            else:
+                return redirect("round_overview", round_id=round_obj.id)
         else:
-            return redirect("round_overview", round_id=round_obj.id)
+            # No value provided - show error and stay on page
+            messages.error(request, "Please provide a response before continuing.")
+            # Don't redirect - fall through to render the page again
 
+    # GET request or failed validation - render the page
     feedback_allowed = True
     if round_obj.number == 1 and not round_obj.show_feedback_immediately:
         has_any = Response.objects.filter(panelist=panelist, round_item__round=round_obj).exists()
@@ -221,11 +262,8 @@ def item_detail(request, round_item_id):
     if feedback_allowed and ri.item.item_type == "likert5":
         agg = Response.objects.filter(round_item=ri).aggregate(mean=Avg("value"))
 
-    # Get all items for navigation and progress
-    all_items = list(round_obj.round_items.order_by('order'))
     total_items = len(all_items)
-    current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), 0)
-    progress_percent = int((current_index / total_items) * 100) if total_items > 0 else 0
+    progress_percent = int(((current_index + 1) / total_items) * 100) if total_items > 0 else 0
 
     # Previous and next items
     prev_item = all_items[current_index - 1] if current_index > 0 else None

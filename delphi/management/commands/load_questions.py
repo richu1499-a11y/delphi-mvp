@@ -106,7 +106,7 @@ Statements were accepted as having reached consensus if after second-round votin
             'option_a': 'Cotton/Consensus criteria (definition: Abdominal pain suggestive of pancreatitis requiring new hospitalization or extension of hospital stay for 2–3 days and a serum amylase at least three times the upper limit of normal, 24 hours after the procedure)',
             'option_b': 'Atlanta criteria (definition: (1) abdominal pain consistent with acute pancreatitis (acute onset of a persistent, severe, epigastric pain often radiating to the back); (2) serum lipase activity (or amylase activity) at least three times greater than the upper limit of normal; and (3) characteristic findings of acute pancreatitis on contrast-enhanced computed tomography (CECT) and less commonly magnetic resonance imaging (MRI) or transabdominal ultrasonography)',
             'option_c': 'I don\'t know',
-            'option_d': 'Other (Free text option to be included)',
+            'option_d': 'Other (please specify)',
         })
         
         # Question 2: Biochemical markers (Checkbox)
@@ -117,7 +117,7 @@ Statements were accepted as having reached consensus if after second-round votin
             'option_b': 'Lipase',
             'option_c': 'CRP',
             'option_d': 'I don\'t know',
-            'option_e': 'Other (Free text option to be included)',
+            'option_e': 'Other (please specify)',
             'option_f': 'None',
         })
         
@@ -173,12 +173,12 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 6: Difficult cannulation definition (MCQ)
         questions.append({
-            'prompt': 'Difficult cannulation is best defined as',
+            'prompt': 'Difficult cannulation is best defined as:',
             'item_type': 'multiple',
             'option_a': '> 5 cannulation attempts',
-            'option_b': '>8 Cannulation attempts',
-            'option_c': '>10 Cannulation attempts',
-            'option_d': '>10 Minutes of attempts',
+            'option_b': '>8 cannulation attempts',
+            'option_c': '>10 cannulation attempts',
+            'option_d': '>10 minutes of attempts',
             'option_e': 'I don\'t know',
         })
         
@@ -222,74 +222,74 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 8: Other procedure-related risk factors (Free text)
         questions.append({
-            'prompt': 'Other patient-related risk factor(s) not listed above (please specify):',
+            'prompt': 'Other procedure-related risk factor(s) not listed above (please specify):',
             'item_type': 'text',
         })
         
         # Question 9: Pancreatic Cancer as risk factor (MCQ)
         questions.append({
-            'prompt': 'Should Pancreatic Cancer be considered a risk factor in PEP',
+            'prompt': 'Should Pancreatic Cancer be considered a risk factor in PEP?',
             'item_type': 'multiple',
             'option_a': 'Yes',
             'option_b': 'No',
             'option_c': 'I don\'t know',
-            'option_d': 'Other (Free text option to be included)',
+            'option_d': 'Other (please specify)',
         })
         
         # Question 10: High risk definition (MCQ)
         questions.append({
-            'prompt': 'In PEP High risk should be defined as',
+            'prompt': 'In PEP, High risk should be defined as:',
             'item_type': 'multiple',
             'option_a': 'Presence of one definite risk factor or two likely risk factors',
-            'option_b': 'Suspected sphincter of Oddi dysfunction / Age 18–50 years / Female / Normal common bile duct [CBD] diameter [<9 mm] / Normal serum bilirubin / Body mass index >30 kg/m2 / Previous acute pancreatitis',
-            'option_c': 'Pre-cut sphincterotomy / Endoscopic pancreatic sphincterotomy / Endoscopic papillary balloon dilation of the intact biliary sphincter / Difficult cannulation (more than 10 minutes elapsed for the successful selective cannulation, or in failed cannulation / Injection of contrast agent into the pancreatic duct / Female patient and age <60 years / Clinical suspicion of sphincter of Oddi dysfunction / History of recurrent pancreatitis / History of PEP.',
+            'option_b': 'Suspected sphincter of Oddi dysfunction / Age 18–50 years / Female / Normal common bile duct [CBD] diameter [<9 mm] / Normal serum bilirubin / Body mass index >30 kg/m² / Previous acute pancreatitis',
+            'option_c': 'Pre-cut sphincterotomy / Endoscopic pancreatic sphincterotomy / Endoscopic papillary balloon dilation of the intact biliary sphincter / Difficult cannulation (more than 10 minutes elapsed for the successful selective cannulation, or in failed cannulation) / Injection of contrast agent into the pancreatic duct / Female patient and age <60 years / Clinical suspicion of sphincter of Oddi dysfunction / History of recurrent pancreatitis / History of PEP',
             'option_d': 'Presence of one major criteria (History of PEP / Pancreatic sphincterotomy / Precut sphincterotomy / Difficult cannulation (>5 attempts/10 min to cannulate) / Failed cannulation / Pneumatic dilation of an intact sphincter / Sphincter of Oddi dysfunction of type I or type II) OR ≥2 minor inclusion criteria (Age <50 and female gender / History of acute pancreatitis (at least 2 episodes) / >2 pancreatic injections (with at least 1 injection in tail) / Pancreatic acinarization / Pancreatic brush cytology)',
-            'option_e': '<50 years of age and female sex / History of recurrent pancreatitis / clinical suspicion of sphincter of Oddi dysfunction (SOD) / Normal bilirubin (≤1 mg/dL) / Pancreatic sphincterotomy / Pancreatic duct injection; instrumentation of the pancreatic duct (e.g., brush cytology) / Precut sphincterotomy / Pneumatic dilation of an intact biliary sphincter / Ampullectomy / Difficult cannulation (duration of cannulation attempts >5 minutes, more than five attempts, or more than two pancreatic guidewire passages)',
-            'option_f': 'Presence of one major criteria (Clinical suspicion of sphincter of Oddi dysfunction / History of PEP / Pancreatic sphincterotomy / Precut sphincterotomy / ≥8 cannulation attempts / Pneumatic dilatation of an intact biliary sphincter / ampullectomy) OR ≥2 minor inclusion criteria (Women younger than 50 years / History of recurrent pancreatitis (≥2 times) / ≥3 injections of contrast into the pancreatic duct with ≥1 injection to the tail of the pancreas / Opacification of pancreatic acini / Brush cytology performed on the pancreatic duct)',
+            'option_e': '<50 years of age and female sex / History of recurrent pancreatitis / Clinical suspicion of sphincter of Oddi dysfunction (SOD) / Normal bilirubin (≤1 mg/dL) / Pancreatic sphincterotomy / Pancreatic duct injection; instrumentation of the pancreatic duct (e.g., brush cytology) / Precut sphincterotomy / Pneumatic dilation of an intact biliary sphincter / Ampullectomy / Difficult cannulation (duration of cannulation attempts >5 minutes, more than five attempts, or more than two pancreatic guidewire passages)',
+            'option_f': 'Presence of one major criteria (Clinical suspicion of sphincter of Oddi dysfunction / History of PEP / Pancreatic sphincterotomy / Precut sphincterotomy / ≥8 cannulation attempts / Pneumatic dilatation of an intact biliary sphincter / Ampullectomy) OR ≥2 minor inclusion criteria (Women younger than 50 years / History of recurrent pancreatitis (≥2 times) / ≥3 injections of contrast into the pancreatic duct with ≥1 injection to the tail of the pancreas / Opacification of pancreatic acini / Brush cytology performed on the pancreatic duct)',
         })
         
         # Question 11: High risk definition continued (MCQ)
         questions.append({
-            'prompt': 'In PEP High risk should be defined as (continued)',
+            'prompt': 'In PEP, High risk should be defined as (continued):',
             'item_type': 'multiple',
             'option_a': 'Suspected sphincter of Oddi dysfunction / History of prior post-ERCP pancreatitis / Pancreatic sphincterotomy / Balloon dilatation of the biliary sphincter / Normal bilirubin (<1 mg/dL) / Pancreatic duct injection / Precut sphincterotomy / Young age (<30 y)',
             'option_b': 'More than five accidental pancreatograms / Needle knife precutting',
             'option_c': 'Presence of one major criteria (Clinical suspicion of sphincter of Oddi dysfunction / History of post-ERCP pancreatitis / Pancreatic sphincterotomy / Precut sphincterotomy / More than eight cannulation attempts (as determined by the endoscopist) / Pneumatic dilatation of an intact biliary sphincter / Ampullectomy) OR ≥2 minor inclusion criteria (Age of less than 50 years and female sex / History of recurrent pancreatitis (≥2 episodes) / Three or more injections of contrast agent into the pancreatic duct with at least one injection to the tail of the pancreas / Excessive injection of contrast agent into the pancreatic duct resulting in opacification of pancreatic acini / Acquisition of a cytologic specimen from the pancreatic duct with the use of a brush)',
             'option_d': 'I don\'t know',
-            'option_e': 'Other (Free text option to be included)',
+            'option_e': 'Other (please specify)',
         })
         
         # Question 12: Low risk definition (MCQ)
         questions.append({
-            'prompt': 'In PEP Low risk should be defined as',
+            'prompt': 'In PEP, Low risk should be defined as:',
             'item_type': 'multiple',
             'option_a': 'Chronic calcific pancreatitis',
             'option_b': 'Previously undergone ERCP with sphincterotomy',
             'option_c': 'Chronic calcific pancreatitis / Pancreatic-head mass / Undergoing routine biliary-stent exchange',
-            'option_d': 'Chronic calcific pancreatitis / Pancreatic-head mass / Undergoing routine biliary-stent exchange/ Previously undergone ERCP with sphincterotomy',
+            'option_d': 'Chronic calcific pancreatitis / Pancreatic-head mass / Undergoing routine biliary-stent exchange / Previously undergone ERCP with sphincterotomy',
             'option_e': 'I don\'t know',
-            'option_f': 'Other (Free text option to be included)',
+            'option_f': 'Other (please specify)',
         })
         
         # Question 13: Average risk definition (MCQ)
         questions.append({
-            'prompt': 'In PEP Average risk should be defined as',
+            'prompt': 'In PEP, Average risk should be defined as:',
             'item_type': 'multiple',
             'option_a': 'Patient meets neither High-risk nor Low-risk criteria',
             'option_b': 'Average-risk is not a useful category',
             'option_c': 'I don\'t know',
-            'option_d': 'Other (Free text option to be included)',
+            'option_d': 'Other (please specify)',
         })
         
         # Question 14: Risk stratification in trials (MCQ)
         questions.append({
-            'prompt': 'Risk stratification of PEP in trials should be defined as',
+            'prompt': 'Risk stratification of PEP in trials should be defined as:',
             'item_type': 'multiple',
             'option_a': 'High vs average vs low',
             'option_b': 'High + average vs low',
             'option_c': 'No stratification',
             'option_d': 'I don\'t know',
-            'option_e': 'Other (free text option to be included)',
+            'option_e': 'Other (please specify)',
         })
         
         # ================================================================
@@ -298,27 +298,27 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 15: RCT rationale/design (MCQ)
         questions.append({
-            'prompt': 'The rationale / design of a RCT for prevention of PEP should be',
+            'prompt': 'The rationale / design of a RCT for prevention of PEP should be:',
             'item_type': 'multiple',
             'option_a': 'Pragmatic',
             'option_b': 'Explanatory',
             'option_c': 'I don\'t know',
-            'option_d': 'Others',
+            'option_d': 'Other (please specify)',
         })
         
         # Question 16: Placebo use (MCQ)
         questions.append({
-            'prompt': 'Is it acceptable to use placebo in PEP trials including in all comers',
+            'prompt': 'Is it acceptable to use placebo in PEP trials including in all comers?',
             'item_type': 'multiple',
             'option_a': 'Yes',
             'option_b': 'No',
             'option_c': 'I don\'t know',
-            'option_d': 'Others',
+            'option_d': 'Other (please specify)',
         })
         
         # Question 17: Patient inclusion (MCQ)
         questions.append({
-            'prompt': 'Should RCTs include patients who are',
+            'prompt': 'Should RCTs include patients who are:',
             'item_type': 'multiple',
             'option_a': 'High risk',
             'option_b': 'Average risk',
@@ -327,19 +327,19 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 18: Exclusion criteria (MCQ)
         questions.append({
-            'prompt': 'Should future PEP trials exclude the use of',
+            'prompt': 'Should future PEP trials exclude the use of:',
             'item_type': 'multiple',
             'option_a': 'IV Fluids',
             'option_b': 'Rectal NSAIDs',
             'option_c': 'PD stent',
             'option_d': 'Do not exclude any',
             'option_e': 'I don\'t know',
-            'option_f': 'Other',
+            'option_f': 'Other (please specify)',
         })
         
         # Question 19: RRR for new agent vs placebo (MCQ)
         questions.append({
-            'prompt': 'What should be considered as the maximum relative risk reduction (RRR) for power calculations when comparing a new agent to placebo',
+            'prompt': 'What should be considered as the maximum relative risk reduction (RRR) for power calculations when comparing a new agent to placebo?',
             'item_type': 'multiple',
             'option_a': '1%-20%',
             'option_b': '21%-40%',
@@ -351,7 +351,7 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 20: RRR for SOC vs SOC + new agent (MCQ)
         questions.append({
-            'prompt': 'What should be considered as the maximum relative risk reduction for power calculations when comparing standard of care to standard of care plus a new agent',
+            'prompt': 'What should be considered as the maximum relative risk reduction for power calculations when comparing standard of care to standard of care plus a new agent?',
             'item_type': 'multiple',
             'option_a': '1%-20%',
             'option_b': '21%-40%',
@@ -363,36 +363,36 @@ Statements were accepted as having reached consensus if after second-round votin
         
         # Question 21: Ideal RRR - new agent vs placebo (Free text)
         questions.append({
-            'prompt': 'Ideal maximal relative risk reduction for power calculations when comparing a new agent to placebo.',
+            'prompt': 'Ideal maximal relative risk reduction for power calculations when comparing a new agent to placebo:',
             'item_type': 'text',
         })
         
         # Question 22: Ideal RRR - SOC vs SOC + new agent (Free text)
         questions.append({
-            'prompt': 'Ideal maximal relative risk reduction for power calculations when comparing standard of care to standard of care plus a new agent',
+            'prompt': 'Ideal maximal relative risk reduction for power calculations when comparing standard of care to standard of care plus a new agent:',
             'item_type': 'text',
         })
         
         # Question 23: Blinding (MCQ)
         questions.append({
-            'prompt': 'Blinding in RCTs PEP prophylaxis is:',
+            'prompt': 'Blinding in RCTs for PEP prophylaxis is:',
             'item_type': 'multiple',
-            'option_a': 'Necessary: preferred double blinding (patients, ERCPist) or single blinding (patients) when prophylaxis is an ERCP-related intervention (PD stent placement).',
-            'option_b': 'Preferred like answer option 1. But only implemented when feasible in daily practice (example. Blinding in pragmatic hydration studies is not feasible)',
+            'option_a': 'Necessary: preferred double blinding (patients, ERCPist) or single blinding (patients) when prophylaxis is an ERCP-related intervention (PD stent placement)',
+            'option_b': 'Preferred, but only implemented when feasible in daily practice (example: Blinding in pragmatic hydration studies is not feasible)',
             'option_c': 'Not necessary or preferred',
             'option_d': 'I don\'t know',
-            'option_e': 'Others',
+            'option_e': 'Other (please specify)',
         })
         
         # Question 24: Statisticians (MCQ)
         questions.append({
-            'prompt': 'Statisticians involved in RCTs for PEP prophylaxis trials should be',
+            'prompt': 'Statisticians involved in RCTs for PEP prophylaxis trials should be:',
             'item_type': 'multiple',
             'option_a': 'Independent',
             'option_b': 'Blinded',
             'option_c': 'None of the above',
             'option_d': 'I don\'t know',
-            'option_e': 'Other',
+            'option_e': 'Other (please specify)',
         })
         
         # ================================================================
@@ -405,36 +405,36 @@ Statements were accepted as having reached consensus if after second-round votin
             'item_type': 'likert5',
         })
         
-        # Question 26 (19 in doc): Expert endoscopist definition (MCQ)
+        # Question 26: Expert endoscopist definition (MCQ)
         questions.append({
-            'prompt': '19. An expert endoscopist can be defined as:',
+            'prompt': 'An expert endoscopist can be defined as:',
             'item_type': 'multiple',
-            'option_a': 'An ERCP lifetime exposure of more than 200 procedures and / or a current number of more than 40 procedures per year.',
-            'option_b': 'An ERCP lifetime exposure of more than 400 procedures and current number of more than 50 procedures per year for the past three years (FLUYT).',
-            'option_c': 'An ERCP lifetime exposure of more than 156 procedures.',
+            'option_a': 'An ERCP lifetime exposure of more than 200 procedures and/or a current number of more than 40 procedures per year',
+            'option_b': 'An ERCP lifetime exposure of more than 400 procedures and current number of more than 50 procedures per year for the past three years (FLUYT)',
+            'option_c': 'An ERCP lifetime exposure of more than 156 procedures',
             'option_d': 'I don\'t know',
-            'option_e': 'Other',
+            'option_e': 'Other (please specify)',
         })
         
-        # Question 27 (20 in doc): High volume center (MCQ)
+        # Question 27: High volume center (MCQ)
         questions.append({
-            'prompt': '20. A high volume center can be defined as:',
+            'prompt': 'A high volume center can be defined as:',
             'item_type': 'multiple',
             'option_a': '>150 procedures performed per year',
             'option_b': '>200 procedures performed per year',
             'option_c': '>300 procedures performed per year',
             'option_d': '>400 procedures performed per year',
             'option_e': 'I don\'t know',
-            'option_f': 'Other',
+            'option_f': 'Other (please specify)',
         })
         
-        # Question 28 (21 in doc): RCT location (MCQ)
+        # Question 28: RCT location (MCQ)
         questions.append({
-            'prompt': '21. RCTs to post-ERCP pancreatitis prophylaxis should be performed in:',
+            'prompt': 'RCTs for post-ERCP pancreatitis prophylaxis should be performed in:',
             'item_type': 'multiple',
             'option_a': 'Academic hospitals',
             'option_b': 'Teaching hospitals',
-            'option_c': 'Private',
+            'option_c': 'Private hospitals',
             'option_d': 'All above combined',
             'option_e': 'Academic AND teaching hospitals',
             'option_f': 'I don\'t know',
@@ -444,51 +444,51 @@ Statements were accepted as having reached consensus if after second-round votin
         # TOPIC: DATA HANDLING AND DATA INTERPRETATION
         # ================================================================
         
-        # Question 29 (23 in doc): Interim analysis (Likert)
+        # Question 29: Interim analysis (Likert)
         questions.append({
-            'prompt': '23. An interim analysis should be performed and stopping rules should be included',
+            'prompt': 'An interim analysis should be performed and stopping rules should be included:',
             'item_type': 'likert5',
         })
         
-        # Question 30 (24 in doc): Adverse events predefined (Likert)
+        # Question 30: Adverse events predefined (Likert)
         questions.append({
-            'prompt': '24. Potential adverse events should be predefined in the trial protocol',
+            'prompt': 'Potential adverse events should be predefined in the trial protocol:',
             'item_type': 'likert5',
         })
         
-        # Question 31 (25 in doc): SAE reporting (Likert)
+        # Question 31: SAE reporting (Likert)
         questions.append({
-            'prompt': '25. (serious) adverse events should be reported in the main manuscript or supplementary appendix',
+            'prompt': '(Serious) adverse events should be reported in the main manuscript or supplementary appendix:',
             'item_type': 'likert5',
         })
         
-        # Question 32 (26 in doc): Database audit trail (Likert)
+        # Question 32: Database audit trail (Likert)
         questions.append({
-            'prompt': '26. A RCT to post-ERCP pancreatitis prophylaxis should have a database with audit trail',
+            'prompt': 'A RCT for post-ERCP pancreatitis prophylaxis should have a database with audit trail:',
             'item_type': 'likert5',
         })
         
-        # Question 33 (27 in doc): Adjudication committee (Likert)
+        # Question 33: Adjudication committee (Likert)
         questions.append({
-            'prompt': '27. A RCT to post-ERCP pancreatitis prophylaxis should have a adjudication committee',
+            'prompt': 'A RCT for post-ERCP pancreatitis prophylaxis should have an adjudication committee:',
             'item_type': 'likert5',
         })
         
-        # Question 34 (28 in doc): DSMB (Likert)
+        # Question 34: DSMB (Likert)
         questions.append({
-            'prompt': '28. A RCT to post-ERCP pancreatitis prophylaxis should have a Data Safety Monitoring Committee/Board (DSMC or DSMB)',
+            'prompt': 'A RCT for post-ERCP pancreatitis prophylaxis should have a Data Safety Monitoring Committee/Board (DSMC or DSMB):',
             'item_type': 'likert5',
         })
         
-        # Question 35 (29 in doc): Protocol violations predefined (Likert)
+        # Question 35: Protocol violations predefined (Likert)
         questions.append({
-            'prompt': '29. Protocol violations should be predefined',
+            'prompt': 'Protocol violations should be predefined:',
             'item_type': 'likert5',
         })
         
-        # Question 36 (30 in doc): Sample size correction (Likert)
+        # Question 36: Sample size correction (Likert)
         questions.append({
-            'prompt': '30. The sample size should be corrected for potential protocol violations',
+            'prompt': 'The sample size should be corrected for potential protocol violations:',
             'item_type': 'likert5',
         })
         
