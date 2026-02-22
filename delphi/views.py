@@ -2,8 +2,7 @@ from django.contrib import messages
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.http import HttpResponse
 from django.contrib.auth.models import User
 
 from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission
@@ -23,11 +22,13 @@ def home(request):
         if token:
             # Clean up the token - extract UUID if they pasted the full URL
             if "/login/" in token:
+                # Extract token from URL like https://delphi-mvp.onrender.com/login/xxxx-xxxx/
                 import re
                 match = re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', token, re.I)
                 if match:
                     token = match.group(0)
             
+            # Try to find the panelist
             try:
                 from uuid import UUID
                 token_uuid = UUID(token)
@@ -35,7 +36,7 @@ def home(request):
                 if panelist:
                     request.session["panelist_id"] = panelist.id
                     messages.success(request, f"Welcome, {panelist.name or panelist.email}!")
-                    return HttpResponseRedirect(reverse("dashboard"))
+                    return redirect("dashboard")
                 else:
                     messages.error(request, "Invalid token. Please check and try again.")
             except (ValueError, AttributeError):
@@ -49,7 +50,7 @@ def home(request):
 def dashboard(request):
     panelist = _require_panelist(request)
     if not panelist:
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
 
     study = panelist.study
     open_rounds = study.rounds.filter(is_open=True).order_by("number")
@@ -73,7 +74,7 @@ def dashboard(request):
 def round_overview(request, round_id):
     panelist = _require_panelist(request)
     if not panelist:
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
 
     round_obj = get_object_or_404(Round, id=round_id, study=panelist.study)
     ris = list(round_obj.round_items.select_related("item").order_by('order'))
@@ -110,38 +111,38 @@ def round_overview(request, round_id):
 def submit_round(request, round_id):
     panelist = _require_panelist(request)
     if not panelist:
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
 
     round_obj = get_object_or_404(Round, id=round_id, study=panelist.study)
 
     existing = RoundSubmission.objects.filter(panelist=panelist, round=round_obj).first()
     if existing:
         messages.info(request, "This round is already submitted and locked.")
-        return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+        return redirect("round_overview", round_id=round_obj.id)
 
     total = round_obj.round_items.count()
     answered = Response.objects.filter(panelist=panelist, round_item__round=round_obj).count()
 
     if total == 0:
         messages.error(request, "This round has no items yet.")
-        return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+        return redirect("round_overview", round_id=round_obj.id)
 
     if answered < total:
         messages.error(
             request,
             f"Please answer all items before submitting (answered {answered}/{total}).",
         )
-        return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+        return redirect("round_overview", round_id=round_obj.id)
 
     RoundSubmission.objects.create(panelist=panelist, round=round_obj)
     messages.success(request, "Submitted. Your responses are now locked.")
-    return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+    return redirect("round_overview", round_id=round_obj.id)
 
 
 def item_detail(request, round_item_id):
     panelist = _require_panelist(request)
     if not panelist:
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
 
     ri = get_object_or_404(RoundItem, id=round_item_id, round__study=panelist.study)
     round_obj = ri.round
@@ -151,18 +152,14 @@ def item_detail(request, round_item_id):
 
     resp = Response.objects.filter(panelist=panelist, round_item=ri).first()
 
-    # Get all items for navigation - IMPORTANT: order by 'order' field
+    # Get all items for navigation
     all_items = list(round_obj.round_items.order_by('order'))
-    current_index = -1
-    for i, item in enumerate(all_items):
-        if item.id == ri.id:
-            current_index = i
-            break
+    current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), -1)
 
     if request.method == "POST":
         if locked:
             messages.error(request, "This round has been submitted. Responses are locked.")
-            return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+            return redirect("round_overview", round_id=round_obj.id)
 
         value = None
 
@@ -176,6 +173,7 @@ def item_detail(request, round_item_id):
         elif ri.item.item_type == 'multiple':
             value = request.POST.get("value", "").strip()
             other_text = request.POST.get("other_text", "").strip()
+            # If "Other" option selected and text provided, combine them
             if value and other_text:
                 option_text = ""
                 if value == "A" and ri.item.option_a:
@@ -225,6 +223,7 @@ def item_detail(request, round_item_id):
 
         elif ri.item.item_type == 'matrix':
             value = request.POST.get("value", "").strip()
+            # For matrix, treat empty or {} as needing input
             if value == "" or value == "{}":
                 value = ""
 
@@ -243,13 +242,15 @@ def item_detail(request, round_item_id):
             messages.success(request, "Saved.")
             
             # Navigate to next item or back to overview
-            if current_index >= 0 and current_index < len(all_items) - 1:
+            if current_index < len(all_items) - 1:
                 next_item = all_items[current_index + 1]
-                return HttpResponseRedirect(reverse("item_detail", kwargs={"round_item_id": next_item.id}))
+                return redirect("item_detail", round_item_id=next_item.id)
             else:
-                return HttpResponseRedirect(reverse("round_overview", kwargs={"round_id": round_obj.id}))
+                return redirect("round_overview", round_id=round_obj.id)
         else:
+            # No value provided - show error and stay on page
             messages.error(request, "Please provide a response before continuing.")
+            # Don't redirect - fall through to render the page again
 
     # GET request or failed validation - render the page
     feedback_allowed = True
@@ -264,16 +265,20 @@ def item_detail(request, round_item_id):
     total_items = len(all_items)
     progress_percent = int(((current_index + 1) / total_items) * 100) if total_items > 0 else 0
 
+    # Previous and next items
     prev_item = all_items[current_index - 1] if current_index > 0 else None
     next_item = all_items[current_index + 1] if current_index < len(all_items) - 1 else None
 
+    # Get current value for pre-filling form
     current_value = resp.value if resp else ""
     
+    # Parse current value for multiple choice with "Other"
     selected_option = ""
     other_text = ""
     if ri.item.item_type == 'multiple' and current_value:
         if current_value.startswith("Other:"):
             other_text = current_value.replace("Other:", "").strip()
+            # Find which option is "Other"
             if ri.item.option_a and "other" in ri.item.option_a.lower():
                 selected_option = "A"
             elif ri.item.option_b and "other" in ri.item.option_b.lower():
@@ -289,6 +294,7 @@ def item_detail(request, round_item_id):
         else:
             selected_option = current_value
     
+    # Parse current value for checkbox with "Other"
     cb_other_text = ""
     if ri.item.item_type == 'checkbox' and current_value:
         parts = current_value.split(",")
@@ -297,6 +303,7 @@ def item_detail(request, round_item_id):
                 cb_other_text = part.replace("Other:", "").strip()
                 break
 
+    # For matrix questions, get rows and columns
     matrix_rows = []
     matrix_columns = []
     current_matrix_value = {}
@@ -337,43 +344,53 @@ def item_detail(request, round_item_id):
     )
 
 
+# =============================================================================
+# NEW: Simple Token Login (replaces magic links)
+# =============================================================================
 def token_login(request, token):
     """Login using the panelist's permanent token."""
     panelist = get_object_or_404(Panelist, token=token)
     
     if not panelist.is_active:
         messages.error(request, "Your account has been deactivated. Please contact the study administrator.")
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
     
+    # Log them in by storing panelist_id in session
     request.session["panelist_id"] = panelist.id
     
     messages.success(request, f"Welcome, {panelist.name or panelist.email}!")
-    return HttpResponseRedirect(reverse("dashboard"))
+    return redirect("dashboard")
 
 
+# =============================================================================
+# LEGACY: Magic Link Login (kept for backward compatibility)
+# =============================================================================
 def magic_login(request, token):
     magic = get_object_or_404(MagicLink, token=token)
     if not magic.is_valid():
         messages.error(request, "That link is invalid or expired.")
-        return HttpResponseRedirect(reverse("home"))
+        return redirect("home")
 
     request.session["panelist_id"] = magic.panelist_id
 
     next_url = request.GET.get("next", "")
     if next_url.startswith("/"):
-        return HttpResponseRedirect(next_url)
+        return redirect(next_url)
 
-    return HttpResponseRedirect(reverse("dashboard"))
+    return redirect("dashboard")
 
 
 def logout_view(request):
     request.session.flush()
     messages.success(request, "Logged out successfully.")
-    return HttpResponseRedirect(reverse("home"))
+    return redirect("home")
 
 
+# =============================================================================
+# TEMPORARY ADMIN SETUP - DELETE AFTER USE!
+# =============================================================================
 def setup_admin(request):
-    """One-time setup view to create admin user"""
+    """One-time setup view to create admin user - DELETE THIS AFTER USE"""
     secret_key = request.GET.get('key')
     
     if secret_key != 'delphi2024secret':
@@ -402,6 +419,9 @@ def setup_admin(request):
     )
 
 
+# =============================================================================
+# TEMPORARY MIGRATION RUNNER
+# =============================================================================
 def run_migrations(request):
     """One-time migration view"""
     secret_key = request.GET.get('key')
@@ -414,9 +434,11 @@ def run_migrations(request):
     output_messages = []
     
     try:
+        # Run migrations
         call_command('migrate', '--noinput')
         output_messages.append("Migrations completed successfully!")
         
+        # Create admin user only if it doesn't exist
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(
                 username='admin',
@@ -445,6 +467,9 @@ def run_migrations(request):
         )
 
 
+# =============================================================================
+# LOAD QUESTIONS TO PRODUCTION
+# =============================================================================
 def load_questions_view(request):
     """One-time view to load questions into production database"""
     secret_key = request.GET.get('key')
