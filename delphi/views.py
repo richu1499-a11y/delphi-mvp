@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.db.models import Avg
+from django.db.models.functions import Cast
+from django.db.models import FloatField
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
@@ -16,19 +18,15 @@ def _require_panelist(request):
 
 
 def home(request):
-    # Handle token login form submission
     if request.method == "POST":
         token = request.POST.get("token", "").strip()
         if token:
-            # Clean up the token - extract UUID if they pasted the full URL
             if "/login/" in token:
-                # Extract token from URL like https://delphi-mvp.onrender.com/login/xxxx-xxxx/
                 import re
                 match = re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', token, re.I)
                 if match:
                     token = match.group(0)
             
-            # Try to find the panelist
             try:
                 from uuid import UUID
                 token_uuid = UUID(token)
@@ -152,9 +150,15 @@ def item_detail(request, round_item_id):
 
     resp = Response.objects.filter(panelist=panelist, round_item=ri).first()
 
-    # Get all items for navigation
+    # Get all items for navigation - ordered by 'order' field
     all_items = list(round_obj.round_items.order_by('order'))
-    current_index = next((i for i, item in enumerate(all_items) if item.id == ri.id), -1)
+    
+    # Find current index
+    current_index = -1
+    for i, item in enumerate(all_items):
+        if item.id == ri.id:
+            current_index = i
+            break
 
     if request.method == "POST":
         if locked:
@@ -173,7 +177,6 @@ def item_detail(request, round_item_id):
         elif ri.item.item_type == 'multiple':
             value = request.POST.get("value", "").strip()
             other_text = request.POST.get("other_text", "").strip()
-            # If "Other" option selected and text provided, combine them
             if value and other_text:
                 option_text = ""
                 if value == "A" and ri.item.option_a:
@@ -223,7 +226,6 @@ def item_detail(request, round_item_id):
 
         elif ri.item.item_type == 'matrix':
             value = request.POST.get("value", "").strip()
-            # For matrix, treat empty or {} as needing input
             if value == "" or value == "{}":
                 value = ""
 
@@ -242,43 +244,51 @@ def item_detail(request, round_item_id):
             messages.success(request, "Saved.")
             
             # Navigate to next item or back to overview
-            if current_index < len(all_items) - 1:
+            if current_index >= 0 and current_index < len(all_items) - 1:
                 next_item = all_items[current_index + 1]
                 return redirect("item_detail", round_item_id=next_item.id)
             else:
                 return redirect("round_overview", round_id=round_obj.id)
         else:
-            # No value provided - show error and stay on page
             messages.error(request, "Please provide a response before continuing.")
-            # Don't redirect - fall through to render the page again
 
-    # GET request or failed validation - render the page
+    # GET request or failed validation
     feedback_allowed = True
     if round_obj.number == 1 and not round_obj.show_feedback_immediately:
         has_any = Response.objects.filter(panelist=panelist, round_item__round=round_obj).exists()
         feedback_allowed = has_any
 
+    # FIX: Don't use AVG on text field - only calculate for likert questions with numeric values
     agg = None
     if feedback_allowed and ri.item.item_type == "likert5":
-        agg = Response.objects.filter(round_item=ri).aggregate(mean=Avg("value"))
+        try:
+            # Get all numeric responses for this item
+            numeric_values = []
+            responses = Response.objects.filter(round_item=ri)
+            for r in responses:
+                try:
+                    numeric_values.append(float(r.value))
+                except (ValueError, TypeError):
+                    pass
+            
+            if numeric_values:
+                agg = {"mean": sum(numeric_values) / len(numeric_values)}
+        except Exception:
+            agg = None
 
     total_items = len(all_items)
     progress_percent = int(((current_index + 1) / total_items) * 100) if total_items > 0 else 0
 
-    # Previous and next items
     prev_item = all_items[current_index - 1] if current_index > 0 else None
     next_item = all_items[current_index + 1] if current_index < len(all_items) - 1 else None
 
-    # Get current value for pre-filling form
     current_value = resp.value if resp else ""
     
-    # Parse current value for multiple choice with "Other"
     selected_option = ""
     other_text = ""
     if ri.item.item_type == 'multiple' and current_value:
         if current_value.startswith("Other:"):
             other_text = current_value.replace("Other:", "").strip()
-            # Find which option is "Other"
             if ri.item.option_a and "other" in ri.item.option_a.lower():
                 selected_option = "A"
             elif ri.item.option_b and "other" in ri.item.option_b.lower():
@@ -294,7 +304,6 @@ def item_detail(request, round_item_id):
         else:
             selected_option = current_value
     
-    # Parse current value for checkbox with "Other"
     cb_other_text = ""
     if ri.item.item_type == 'checkbox' and current_value:
         parts = current_value.split(",")
@@ -303,7 +312,6 @@ def item_detail(request, round_item_id):
                 cb_other_text = part.replace("Other:", "").strip()
                 break
 
-    # For matrix questions, get rows and columns
     matrix_rows = []
     matrix_columns = []
     current_matrix_value = {}
@@ -344,27 +352,18 @@ def item_detail(request, round_item_id):
     )
 
 
-# =============================================================================
-# NEW: Simple Token Login (replaces magic links)
-# =============================================================================
 def token_login(request, token):
-    """Login using the panelist's permanent token."""
     panelist = get_object_or_404(Panelist, token=token)
     
     if not panelist.is_active:
         messages.error(request, "Your account has been deactivated. Please contact the study administrator.")
         return redirect("home")
     
-    # Log them in by storing panelist_id in session
     request.session["panelist_id"] = panelist.id
-    
     messages.success(request, f"Welcome, {panelist.name or panelist.email}!")
     return redirect("dashboard")
 
 
-# =============================================================================
-# LEGACY: Magic Link Login (kept for backward compatibility)
-# =============================================================================
 def magic_login(request, token):
     magic = get_object_or_404(MagicLink, token=token)
     if not magic.is_valid():
@@ -386,11 +385,7 @@ def logout_view(request):
     return redirect("home")
 
 
-# =============================================================================
-# TEMPORARY ADMIN SETUP - DELETE AFTER USE!
-# =============================================================================
 def setup_admin(request):
-    """One-time setup view to create admin user - DELETE THIS AFTER USE"""
     secret_key = request.GET.get('key')
     
     if secret_key != 'delphi2024secret':
@@ -419,11 +414,7 @@ def setup_admin(request):
     )
 
 
-# =============================================================================
-# TEMPORARY MIGRATION RUNNER
-# =============================================================================
 def run_migrations(request):
-    """One-time migration view"""
     secret_key = request.GET.get('key')
     
     if secret_key != 'delphi2024secret':
@@ -434,11 +425,9 @@ def run_migrations(request):
     output_messages = []
     
     try:
-        # Run migrations
         call_command('migrate', '--noinput')
         output_messages.append("Migrations completed successfully!")
         
-        # Create admin user only if it doesn't exist
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser(
                 username='admin',
@@ -467,11 +456,7 @@ def run_migrations(request):
         )
 
 
-# =============================================================================
-# LOAD QUESTIONS TO PRODUCTION
-# =============================================================================
 def load_questions_view(request):
-    """One-time view to load questions into production database"""
     secret_key = request.GET.get('key')
     
     if secret_key != 'delphi2024secret':
