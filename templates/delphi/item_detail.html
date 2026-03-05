@@ -107,61 +107,73 @@
                         </div>
 
                         {% elif round_item.item.item_type == 'multiple' %}
-                        <!-- MULTIPLE CHOICE -->
+                        <!-- MULTIPLE CHOICE - Entire card clickable -->
                         <div class="multiple-choice-container mb-4">
                             {% if round_item.item.option_a %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="A"
-                                       id="optionA" {% if current_value == 'A' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionA">
-                                    <strong class="text-primary">A.</strong> {{ round_item.item.option_a }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionA">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'A' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="A"
+                                           id="optionA" {% if current_value == 'A' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">A.</strong> {{ round_item.item.option_a }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_b %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="B"
-                                       id="optionB" {% if current_value == 'B' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionB">
-                                    <strong class="text-primary">B.</strong> {{ round_item.item.option_b }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionB">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'B' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="B"
+                                           id="optionB" {% if current_value == 'B' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">B.</strong> {{ round_item.item.option_b }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_c %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="C"
-                                       id="optionC" {% if current_value == 'C' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionC">
-                                    <strong class="text-primary">C.</strong> {{ round_item.item.option_c }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionC">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'C' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="C"
+                                           id="optionC" {% if current_value == 'C' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">C.</strong> {{ round_item.item.option_c }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_d %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="D"
-                                       id="optionD" {% if current_value == 'D' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionD">
-                                    <strong class="text-primary">D.</strong> {{ round_item.item.option_d }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionD">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'D' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="D"
+                                           id="optionD" {% if current_value == 'D' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">D.</strong> {{ round_item.item.option_d }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_e %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="E"
-                                       id="optionE" {% if current_value == 'E' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionE">
-                                    <strong class="text-primary">E.</strong> {{ round_item.item.option_e }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionE">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'E' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="E"
+                                           id="optionE" {% if current_value == 'E' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">E.</strong> {{ round_item.item.option_e }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_f %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input mc-option" type="radio" name="value" value="F"
-                                       id="optionF" {% if current_value == 'F' %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="optionF">
-                                    <strong class="text-primary">F.</strong> {{ round_item.item.option_f }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="optionF">
+                                <div class="option-card p-2 p-md-3 border rounded {% if current_value == 'F' %}selected{% endif %}">
+                                    <input class="form-check-input mc-option" type="radio" name="value" value="F"
+                                           id="optionF" {% if current_value == 'F' %}checked{% endif %} hidden>
+                                    <span class="option-text">
+                                        <strong class="text-primary">F.</strong> {{ round_item.item.option_f }}
+                                    </span>
+                                </div>
+                            </label>
                             {% endif %}
 
                             <!-- Other Text Box -->
@@ -173,62 +185,62 @@
                         </div>
 
                         {% elif round_item.item.item_type == 'checkbox' %}
-                        <!-- CHECKBOX (Select Multiple) -->
+                        <!-- CHECKBOX (Select Multiple) - Entire card clickable -->
                         <div class="checkbox-container mb-4">
                             <p class="text-muted mb-3"><em>Select all that apply:</em></p>
                             {% if round_item.item.option_a %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="A"
-                                       id="checkA" {% if 'A' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkA">
-                                    {{ round_item.item.option_a }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkA">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'A' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="A"
+                                           id="checkA" {% if 'A' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_a }}</span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_b %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="B"
-                                       id="checkB" {% if 'B' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkB">
-                                    {{ round_item.item.option_b }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkB">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'B' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="B"
+                                           id="checkB" {% if 'B' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_b }}</span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_c %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="C"
-                                       id="checkC" {% if 'C' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkC">
-                                    {{ round_item.item.option_c }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkC">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'C' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="C"
+                                           id="checkC" {% if 'C' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_c }}</span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_d %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="D"
-                                       id="checkD" {% if 'D' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkD">
-                                    {{ round_item.item.option_d }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkD">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'D' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="D"
+                                           id="checkD" {% if 'D' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_d }}</span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_e %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="E"
-                                       id="checkE" {% if 'E' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkE">
-                                    {{ round_item.item.option_e }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkE">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'E' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="E"
+                                           id="checkE" {% if 'E' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_e }}</span>
+                                </div>
+                            </label>
                             {% endif %}
                             {% if round_item.item.option_f %}
-                            <div class="form-check mb-2 mb-md-3 p-2 p-md-3 border rounded option-card">
-                                <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="F"
-                                       id="checkF" {% if 'F' in current_value %}checked{% endif %}>
-                                <label class="form-check-label ms-2 option-label" for="checkF">
-                                    {{ round_item.item.option_f }}
-                                </label>
-                            </div>
+                            <label class="option-card-label d-block mb-2 mb-md-3" for="checkF">
+                                <div class="option-card p-2 p-md-3 border rounded {% if 'F' in current_value %}selected{% endif %}">
+                                    <input class="form-check-input cb-option" type="checkbox" name="checkbox_value" value="F"
+                                           id="checkF" {% if 'F' in current_value %}checked{% endif %} hidden>
+                                    <span class="option-text">{{ round_item.item.option_f }}</span>
+                                </div>
+                            </label>
                             {% endif %}
 
                             <!-- Other Text Box for Checkbox -->
@@ -240,33 +252,52 @@
                         </div>
 
                         {% elif round_item.item.item_type == 'matrix' %}
-                        <!-- MATRIX (Checkbox Grid) - Mobile Friendly -->
+                        <!-- MATRIX with Conditional Logic (Yes/No first, then classification) -->
                         <div class="matrix-container mb-4">
-                            <p class="text-muted mb-3"><em>For each factor, select the appropriate classification:</em></p>
+                            <p class="text-muted mb-3"><em>For each factor: First select Yes or No. If Yes, then classify as Major, Minor, or I don't know.</em></p>
                             
                             <!-- Desktop Table View -->
                             <div class="d-none d-lg-block table-responsive">
-                                <table class="table table-bordered table-hover matrix-table">
+                                <table class="table table-bordered matrix-table">
                                     <thead class="table-primary">
                                         <tr>
                                             <th class="factor-column">Factor</th>
-                                            {% for col in matrix_columns %}
-                                            <th class="text-center column-header">{{ col }}</th>
-                                            {% endfor %}
+                                            <th class="text-center" style="width: 80px;">Yes</th>
+                                            <th class="text-center" style="width: 80px;">No</th>
+                                            <th class="text-center classification-col" style="width: 80px;">Major</th>
+                                            <th class="text-center classification-col" style="width: 80px;">Minor</th>
+                                            <th class="text-center classification-col" style="width: 100px;">I don't know</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for row in matrix_rows %}
-                                        <tr>
+                                        <tr data-row="{{ row }}">
                                             <td class="factor-cell">{{ row }}</td>
-                                            {% for col in matrix_columns %}
-                                            <td class="text-center checkbox-cell">
-                                                <input type="checkbox"
-                                                       class="form-check-input matrix-checkbox"
-                                                       data-row="{{ row }}"
-                                                       data-col="{{ col }}">
+                                            <td class="text-center">
+                                                <input type="radio" class="form-check-input matrix-yesno" 
+                                                       name="yesno_{{ forloop.counter }}" value="Yes"
+                                                       data-row="{{ row }}" data-type="yesno">
                                             </td>
-                                            {% endfor %}
+                                            <td class="text-center">
+                                                <input type="radio" class="form-check-input matrix-yesno" 
+                                                       name="yesno_{{ forloop.counter }}" value="No"
+                                                       data-row="{{ row }}" data-type="yesno">
+                                            </td>
+                                            <td class="text-center classification-cell">
+                                                <input type="radio" class="form-check-input matrix-class" 
+                                                       name="class_{{ forloop.counter }}" value="Major"
+                                                       data-row="{{ row }}" data-type="class" disabled>
+                                            </td>
+                                            <td class="text-center classification-cell">
+                                                <input type="radio" class="form-check-input matrix-class" 
+                                                       name="class_{{ forloop.counter }}" value="Minor"
+                                                       data-row="{{ row }}" data-type="class" disabled>
+                                            </td>
+                                            <td class="text-center classification-cell">
+                                                <input type="radio" class="form-check-input matrix-class" 
+                                                       name="class_{{ forloop.counter }}" value="I don't know"
+                                                       data-row="{{ row }}" data-type="class" disabled>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -276,26 +307,45 @@
                             <!-- Mobile Card View -->
                             <div class="d-lg-none">
                                 {% for row in matrix_rows %}
-                                <div class="card mb-3 matrix-mobile-card">
+                                <div class="card mb-3 matrix-mobile-card" data-row="{{ row }}">
                                     <div class="card-header bg-light py-2">
                                         <strong class="small">{{ row }}</strong>
                                     </div>
                                     <div class="card-body py-2">
-                                        <div class="row g-2">
-                                            {% for col in matrix_columns %}
-                                            <div class="col-6 col-sm-4">
-                                                <div class="form-check">
-                                                    <input type="checkbox"
-                                                           class="form-check-input matrix-checkbox"
-                                                           data-row="{{ row }}"
-                                                           data-col="{{ col }}"
-                                                           id="mobile_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
-                                                    <label class="form-check-label small" for="mobile_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
-                                                        {{ col }}
-                                                    </label>
-                                                </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Is this a risk factor?</label>
+                                            <div class="btn-group w-100" role="group">
+                                                <input type="radio" class="btn-check matrix-yesno-mobile" 
+                                                       name="mobile_yesno_{{ forloop.counter }}" 
+                                                       id="mobile_yes_{{ forloop.counter }}" value="Yes"
+                                                       data-row="{{ row }}">
+                                                <label class="btn btn-outline-success btn-sm" for="mobile_yes_{{ forloop.counter }}">Yes</label>
+                                                <input type="radio" class="btn-check matrix-yesno-mobile" 
+                                                       name="mobile_yesno_{{ forloop.counter }}" 
+                                                       id="mobile_no_{{ forloop.counter }}" value="No"
+                                                       data-row="{{ row }}">
+                                                <label class="btn btn-outline-danger btn-sm" for="mobile_no_{{ forloop.counter }}">No</label>
                                             </div>
-                                            {% endfor %}
+                                        </div>
+                                        <div class="classification-section" style="display: none;">
+                                            <label class="form-label small fw-bold">Classification:</label>
+                                            <div class="btn-group w-100" role="group">
+                                                <input type="radio" class="btn-check matrix-class-mobile" 
+                                                       name="mobile_class_{{ forloop.counter }}" 
+                                                       id="mobile_major_{{ forloop.counter }}" value="Major"
+                                                       data-row="{{ row }}">
+                                                <label class="btn btn-outline-primary btn-sm" for="mobile_major_{{ forloop.counter }}">Major</label>
+                                                <input type="radio" class="btn-check matrix-class-mobile" 
+                                                       name="mobile_class_{{ forloop.counter }}" 
+                                                       id="mobile_minor_{{ forloop.counter }}" value="Minor"
+                                                       data-row="{{ row }}">
+                                                <label class="btn btn-outline-primary btn-sm" for="mobile_minor_{{ forloop.counter }}">Minor</label>
+                                                <input type="radio" class="btn-check matrix-class-mobile" 
+                                                       name="mobile_class_{{ forloop.counter }}" 
+                                                       id="mobile_idk_{{ forloop.counter }}" value="I don't know"
+                                                       data-row="{{ row }}">
+                                                <label class="btn btn-outline-secondary btn-sm" for="mobile_idk_{{ forloop.counter }}">I don't know</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -318,18 +368,18 @@
                         <div class="d-flex justify-content-between mt-4 gap-2">
                             {% if prev_item %}
                             <a href="{% url 'item_detail' prev_item.id %}" class="btn btn-outline-secondary flex-shrink-0">
-                                <i class="bi bi-arrow-left d-md-none"></i>
-                                <span class="d-none d-md-inline">Previous</span>
+                                <span class="d-none d-md-inline">← Previous</span>
+                                <span class="d-md-none">← Back</span>
                             </a>
                             {% else %}
                             <a href="{% url 'round_overview' round_item.round.id %}" class="btn btn-outline-secondary flex-shrink-0">
-                                <i class="bi bi-arrow-left d-md-none"></i>
-                                <span class="d-none d-md-inline">Back to Overview</span>
+                                <span class="d-none d-md-inline">← Back to Overview</span>
+                                <span class="d-md-none">← Overview</span>
                             </a>
                             {% endif %}
 
                             <button type="submit" class="btn btn-primary flex-grow-1 flex-md-grow-0 px-md-4">
-                                Save & Continue <i class="bi bi-arrow-right ms-1"></i>
+                                Save & Continue →
                             </button>
                         </div>
 
@@ -369,18 +419,25 @@
         align-items: center; 
         justify-content: center;
         margin: 0 auto;
+        background-color: white;
     }
     
     .likert-number { 
-        color: white; 
         font-size: 1.1rem; 
         font-weight: bold; 
     }
     
     .btn-check:checked + .likert-btn { 
-        transform: scale(1.1); 
-        box-shadow: 0 0 10px rgba(0, 45, 114, 0.4); 
+        transform: scale(1.15); 
+        box-shadow: 0 0 10px rgba(0, 45, 114, 0.4);
+        color: white;
     }
+    
+    .btn-check:checked + .btn-outline-danger { background-color: #dc3545; border-color: #dc3545; }
+    .btn-check:checked + .btn-outline-warning { background-color: #fd7e14; border-color: #fd7e14; }
+    .btn-check:checked + .btn-outline-secondary { background-color: #6c757d; border-color: #6c757d; }
+    .btn-check:checked + .btn-outline-info { background-color: #17a2b8; border-color: #17a2b8; }
+    .btn-check:checked + .btn-outline-success { background-color: #28a745; border-color: #28a745; }
     
     .likert-label { 
         font-size: 0.6rem; 
@@ -407,38 +464,75 @@
         .likert-label { font-size: 0.75rem; min-height: 40px; }
     }
     
-    /* Option Cards */
-    .option-card { transition: all 0.2s ease; cursor: pointer; }
-    .option-card:hover { background-color: #f8f9fa; border-color: #002D72 !important; }
-    .option-card:has(.form-check-input:checked) { background-color: #e7f1ff; border-color: #002D72 !important; border-width: 2px; }
+    /* Option Cards - Entire card clickable */
+    .option-card-label {
+        cursor: pointer;
+        margin: 0;
+    }
     
-    .option-label {
-        font-size: 0.85rem;
-        line-height: 1.4;
+    .option-card { 
+        transition: all 0.2s ease; 
+        cursor: pointer;
+        background-color: #fff;
+    }
+    
+    .option-card:hover { 
+        background-color: #f0f7ff; 
+        border-color: #002D72 !important; 
+    }
+    
+    .option-card.selected,
+    .option-card-label input:checked + .option-card,
+    .option-card:has(input:checked) { 
+        background-color: #e7f1ff; 
+        border-color: #002D72 !important; 
+        border-width: 2px;
+        box-shadow: 0 0 5px rgba(0, 45, 114, 0.2);
+    }
+    
+    .option-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        display: block;
     }
     
     @media (min-width: 768px) {
-        .option-label { font-size: 1rem; }
+        .option-text { font-size: 1rem; }
     }
     
     /* Matrix Table - Desktop */
     .matrix-table { font-size: 0.85rem; }
     .matrix-table th { font-weight: 600; vertical-align: middle; }
     .factor-column { width: 40%; min-width: 200px; }
-    .column-header { width: 10%; min-width: 70px; font-size: 0.75rem; }
     .factor-cell { font-weight: 500; background-color: #f8f9fa; }
-    .checkbox-cell { vertical-align: middle; }
-    .matrix-checkbox { width: 1.1rem; height: 1.1rem; cursor: pointer; }
-    .matrix-checkbox:checked { background-color: #002D72; border-color: #002D72; }
-    .matrix-table tbody tr:hover { background-color: #e7f1ff; }
+    .matrix-table input[type="radio"] { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+    .matrix-table input[type="radio"]:checked { background-color: #002D72; border-color: #002D72; }
+    .matrix-table tbody tr:hover { background-color: #f0f7ff; }
+    
+    /* Classification columns - grayed out until Yes is selected */
+    .classification-cell input:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    
+    .classification-col {
+        background-color: #f8f9fa;
+    }
     
     /* Matrix Mobile Cards */
     .matrix-mobile-card .card-header {
         font-size: 0.85rem;
     }
     
-    .matrix-mobile-card .form-check-label {
-        font-size: 0.75rem;
+    .matrix-mobile-card .btn-sm {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
+    }
+    
+    .classification-section {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #dee2e6;
     }
     
     /* Other Text Containers */
@@ -466,20 +560,54 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // ========================================
+    // OPTION CARD SELECTION VISUAL FEEDBACK
+    // ========================================
+    document.querySelectorAll('.option-card-label').forEach(function(label) {
+        var input = label.querySelector('input');
+        var card = label.querySelector('.option-card');
+        
+        if (input && card) {
+            // Update visual state on change
+            input.addEventListener('change', function() {
+                // For radio buttons, remove selected from all cards in container
+                if (input.type === 'radio') {
+                    var container = label.closest('.multiple-choice-container, .checkbox-container');
+                    if (container) {
+                        container.querySelectorAll('.option-card').forEach(function(c) {
+                            c.classList.remove('selected');
+                        });
+                    }
+                }
+                
+                // Toggle selected class
+                if (input.checked) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+            
+            // Check initial state
+            if (input.checked) {
+                card.classList.add('selected');
+            }
+        }
+    });
+
+    // ========================================
     // MULTIPLE CHOICE - Show "Other" text box
     // ========================================
     var mcOptions = document.querySelectorAll('.mc-option');
     var otherTextContainer = document.getElementById('other-text-container');
-    var otherText = document.getElementById('other-text');
 
     if (mcOptions.length > 0) {
         function checkOtherOption() {
             var showOther = false;
             mcOptions.forEach(function(opt) {
                 if (opt.checked) {
-                    var label = opt.closest('.option-card').querySelector('.form-check-label');
-                    var labelText = label ? label.textContent.toLowerCase() : '';
-                    if (labelText.includes('other')) {
+                    var card = opt.closest('.option-card');
+                    var text = card ? card.textContent.toLowerCase() : '';
+                    if (text.includes('other')) {
                         showOther = true;
                     }
                 }
@@ -489,10 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Check on page load
         checkOtherOption();
-        
-        // Check on change
         mcOptions.forEach(function(opt) {
             opt.addEventListener('change', checkOtherOption);
         });
@@ -509,9 +634,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var showOther = false;
             cbOptions.forEach(function(opt) {
                 if (opt.checked) {
-                    var label = opt.closest('.option-card').querySelector('.form-check-label');
-                    var labelText = label ? label.textContent.toLowerCase() : '';
-                    if (labelText.includes('other')) {
+                    var card = opt.closest('.option-card');
+                    var text = card ? card.textContent.toLowerCase() : '';
+                    if (text.includes('other')) {
                         showOther = true;
                     }
                 }
@@ -522,46 +647,159 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         checkCbOtherOption();
-        
         cbOptions.forEach(function(opt) {
             opt.addEventListener('change', checkCbOtherOption);
         });
     }
 
     // ========================================
-    // MATRIX QUESTIONS
+    // MATRIX QUESTIONS - Conditional Logic
     // ========================================
     var matrixValue = document.getElementById('matrix-value');
+    
     if (matrixValue) {
         var data = {};
         try { data = JSON.parse(matrixValue.value || '{}'); } catch(e) { data = {}; }
 
-        // Pre-check saved values
-        document.querySelectorAll('.matrix-checkbox').forEach(function(cb) {
-            var row = cb.getAttribute('data-row');
-            var col = cb.getAttribute('data-col');
-            if (data[row] && data[row].indexOf(col) !== -1) {
-                cb.checked = true;
-            }
+        // Desktop: Handle Yes/No selection
+        document.querySelectorAll('.matrix-yesno').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var row = this.closest('tr');
+                var rowName = this.getAttribute('data-row');
+                var classInputs = row.querySelectorAll('.matrix-class');
+                
+                if (this.value === 'Yes') {
+                    // Enable classification options
+                    classInputs.forEach(function(input) {
+                        input.disabled = false;
+                    });
+                } else {
+                    // Disable and uncheck classification options
+                    classInputs.forEach(function(input) {
+                        input.disabled = true;
+                        input.checked = false;
+                    });
+                }
+                
+                updateMatrixValue();
+            });
         });
 
-        // Update hidden field on change
+        // Desktop: Handle classification selection
+        document.querySelectorAll('.matrix-class').forEach(function(radio) {
+            radio.addEventListener('change', updateMatrixValue);
+        });
+
+        // Mobile: Handle Yes/No selection
+        document.querySelectorAll('.matrix-yesno-mobile').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var card = this.closest('.matrix-mobile-card');
+                var classSection = card.querySelector('.classification-section');
+                
+                if (this.value === 'Yes') {
+                    classSection.style.display = 'block';
+                } else {
+                    classSection.style.display = 'none';
+                    // Uncheck classification options
+                    card.querySelectorAll('.matrix-class-mobile').forEach(function(input) {
+                        input.checked = false;
+                    });
+                }
+                
+                updateMatrixValue();
+            });
+        });
+
+        // Mobile: Handle classification selection
+        document.querySelectorAll('.matrix-class-mobile').forEach(function(radio) {
+            radio.addEventListener('change', updateMatrixValue);
+        });
+
+        // Function to update hidden value
         function updateMatrixValue() {
             var newData = {};
-            document.querySelectorAll('.matrix-checkbox:checked').forEach(function(checked) {
-                var row = checked.getAttribute('data-row');
-                var col = checked.getAttribute('data-col');
-                if (!newData[row]) newData[row] = [];
-                newData[row].push(col);
+            
+            // Desktop
+            document.querySelectorAll('.matrix-yesno:checked').forEach(function(radio) {
+                var rowName = radio.getAttribute('data-row');
+                var yesNoValue = radio.value;
+                
+                if (yesNoValue === 'Yes') {
+                    var row = radio.closest('tr');
+                    var classRadio = row.querySelector('.matrix-class:checked');
+                    var classValue = classRadio ? classRadio.value : null;
+                    newData[rowName] = { answer: 'Yes', classification: classValue };
+                } else {
+                    newData[rowName] = { answer: 'No', classification: null };
+                }
             });
+            
+            // Mobile
+            document.querySelectorAll('.matrix-yesno-mobile:checked').forEach(function(radio) {
+                var rowName = radio.getAttribute('data-row');
+                var yesNoValue = radio.value;
+                
+                if (yesNoValue === 'Yes') {
+                    var card = radio.closest('.matrix-mobile-card');
+                    var classRadio = card.querySelector('.matrix-class-mobile:checked');
+                    var classValue = classRadio ? classRadio.value : null;
+                    newData[rowName] = { answer: 'Yes', classification: classValue };
+                } else {
+                    newData[rowName] = { answer: 'No', classification: null };
+                }
+            });
+            
             matrixValue.value = JSON.stringify(newData);
         }
-        
-        document.querySelectorAll('.matrix-checkbox').forEach(function(cb) {
-            cb.addEventListener('change', updateMatrixValue);
-        });
 
-        // Update before submit
+        // Pre-populate from saved data
+        function loadSavedData() {
+            for (var rowName in data) {
+                var rowData = data[rowName];
+                
+                // Desktop
+                var desktopRow = document.querySelector('tr[data-row="' + rowName + '"]');
+                if (desktopRow) {
+                    var yesNoRadio = desktopRow.querySelector('.matrix-yesno[value="' + rowData.answer + '"]');
+                    if (yesNoRadio) {
+                        yesNoRadio.checked = true;
+                        
+                        if (rowData.answer === 'Yes') {
+                            desktopRow.querySelectorAll('.matrix-class').forEach(function(input) {
+                                input.disabled = false;
+                            });
+                            
+                            if (rowData.classification) {
+                                var classRadio = desktopRow.querySelector('.matrix-class[value="' + rowData.classification + '"]');
+                                if (classRadio) classRadio.checked = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Mobile
+                var mobileCard = document.querySelector('.matrix-mobile-card[data-row="' + rowName + '"]');
+                if (mobileCard) {
+                    var mobileYesNo = mobileCard.querySelector('.matrix-yesno-mobile[value="' + rowData.answer + '"]');
+                    if (mobileYesNo) {
+                        mobileYesNo.checked = true;
+                        
+                        if (rowData.answer === 'Yes') {
+                            mobileCard.querySelector('.classification-section').style.display = 'block';
+                            
+                            if (rowData.classification) {
+                                var mobileClass = mobileCard.querySelector('.matrix-class-mobile[value="' + rowData.classification + '"]');
+                                if (mobileClass) mobileClass.checked = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        loadSavedData();
+
+        // Update before form submit
         document.getElementById('response-form').addEventListener('submit', updateMatrixValue);
     }
 });
