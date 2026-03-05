@@ -384,6 +384,36 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect("home")
 
+def demo_login(request):
+    """Demo access - creates or uses a demo panelist for testing"""
+    from delphi.models import Study, Panelist
+    
+    # Get the first study
+    study = Study.objects.first()
+    if not study:
+        messages.error(request, "No study has been created yet.")
+        return redirect("home")
+    
+    # Get or create a demo panelist
+    demo_panelist, created = Panelist.objects.get_or_create(
+        email="demo@example.com",
+        study=study,
+        defaults={
+            "name": "Demo User",
+            "institution": "Demo Access",
+            "is_active": True
+        }
+    )
+    
+    # Log them in
+    request.session["panelist_id"] = demo_panelist.id
+    
+    if created:
+        messages.success(request, "Welcome to the Demo! You can test all features.")
+    else:
+        messages.success(request, "Welcome back to the Demo!")
+    
+    return redirect("dashboard")
 
 def setup_admin(request):
     secret_key = request.GET.get('key')
