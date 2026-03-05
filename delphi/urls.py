@@ -7,7 +7,8 @@ urlpatterns = [
     path("round/<int:round_id>/", views.round_overview, name="round_overview"),
     path("round/<int:round_id>/submit/", views.submit_round, name="submit_round"),
     path("item/<int:round_item_id>/", views.item_detail, name="item_detail"),
-    path("demo/", views.demo_login, name="demo_login"),	
+    path("demo/", views.demo_login, name="demo_login"),
+    path("consent/", views.consent, name="consent"),	
     
     # NEW: Simple token login (permanent, never expires)
     path("login/<uuid:token>/", views.token_login, name="token_login"),

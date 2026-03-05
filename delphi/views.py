@@ -6,8 +6,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.utils import timezone
 
-from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission
+from .models import MagicLink, Panelist, Response, Round, RoundItem, RoundSubmission, Study
 
 
 def _require_panelist(request):
@@ -49,6 +50,10 @@ def dashboard(request):
     panelist = _require_panelist(request)
     if not panelist:
         return redirect("home")
+    
+    # Check if consent has been given
+    if not panelist.consent_given:
+        return redirect("consent")
 
     study = panelist.study
     open_rounds = study.rounds.filter(is_open=True).order_by("number")
@@ -69,10 +74,52 @@ def dashboard(request):
     )
 
 
+def consent(request):
+    panelist = _require_panelist(request)
+    if not panelist:
+        return redirect("home")
+    
+    # If already consented, go to dashboard
+    if panelist.consent_given:
+        return redirect("dashboard")
+    
+    if request.method == "POST":
+        action = request.POST.get("action")
+        
+        if action == "agree":
+            # Check all checkboxes were checked
+            consent1 = request.POST.get("consent1")
+            consent2 = request.POST.get("consent2")
+            consent3 = request.POST.get("consent3")
+            
+            if consent1 and consent2 and consent3:
+                panelist.consent_given = True
+                panelist.consent_timestamp = timezone.now()
+                panelist.save()
+                messages.success(request, "Thank you for agreeing to participate. Welcome to the study!")
+                return redirect("dashboard")
+            else:
+                messages.error(request, "Please check all consent boxes to continue.")
+        
+        elif action == "decline":
+            messages.info(request, "Thank you for your consideration. You have chosen not to participate.")
+            # Log them out
+            request.session.flush()
+            return redirect("home")
+    
+    return render(request, "delphi/consent.html", {
+        "panelist": panelist,
+    })
+
+
 def round_overview(request, round_id):
     panelist = _require_panelist(request)
     if not panelist:
         return redirect("home")
+    
+    # Check if consent has been given
+    if not panelist.consent_given:
+        return redirect("consent")
 
     round_obj = get_object_or_404(Round, id=round_id, study=panelist.study)
     ris = list(round_obj.round_items.select_related("item").order_by('order'))
@@ -141,6 +188,10 @@ def item_detail(request, round_item_id):
     panelist = _require_panelist(request)
     if not panelist:
         return redirect("home")
+    
+    # Check if consent has been given
+    if not panelist.consent_given:
+        return redirect("consent")
 
     ri = get_object_or_404(RoundItem, id=round_item_id, round__study=panelist.study)
     round_obj = ri.round
@@ -166,6 +217,7 @@ def item_detail(request, round_item_id):
             return redirect("round_overview", round_id=round_obj.id)
 
         value = None
+        comment = request.POST.get("comment", "").strip()  # Get comment from form
 
         # Get the value based on question type
         if ri.item.item_type == 'likert5':
@@ -237,9 +289,14 @@ def item_detail(request, round_item_id):
 
         # Check if we have a valid response
         if value:
-            # Save the response
+            # Save the response with comment
             Response.objects.update_or_create(
-                panelist=panelist, round_item=ri, defaults={"value": value}
+                panelist=panelist, 
+                round_item=ri, 
+                defaults={
+                    "value": value,
+                    "comment": comment if comment else None
+                }
             )
             messages.success(request, "Saved.")
             
@@ -283,6 +340,7 @@ def item_detail(request, round_item_id):
     next_item = all_items[current_index + 1] if current_index < len(all_items) - 1 else None
 
     current_value = resp.value if resp else ""
+    current_comment = resp.comment if resp else ""  # Get existing comment
     
     selected_option = ""
     other_text = ""
@@ -342,6 +400,7 @@ def item_detail(request, round_item_id):
             "prev_item": prev_item,
             "next_item": next_item,
             "current_value": current_value,
+            "current_comment": current_comment,
             "selected_option": selected_option,
             "other_text": other_text,
             "cb_other_text": cb_other_text,
@@ -384,10 +443,9 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect("home")
 
+
 def demo_login(request):
     """Demo access - creates or uses a demo panelist for testing"""
-    from delphi.models import Study, Panelist
-    
     # Get the first study
     study = Study.objects.first()
     if not study:
@@ -414,6 +472,7 @@ def demo_login(request):
         messages.success(request, "Welcome back to the Demo!")
     
     return redirect("dashboard")
+
 
 def setup_admin(request):
     secret_key = request.GET.get('key')

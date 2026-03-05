@@ -92,6 +92,7 @@ class Item(models.Model):
             return json.loads(self.matrix_columns)
         return []
 
+
 class RoundItem(models.Model):
     round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="round_items")
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name="round_items")
@@ -111,6 +112,10 @@ class Panelist(models.Model):
     name = models.CharField(max_length=255, blank=True)
     institution = models.CharField(max_length=255, blank=True, help_text="Institution/Affiliation")
     is_active = models.BooleanField(default=True)
+    
+    # Consent tracking
+    consent_given = models.BooleanField(default=False)
+    consent_timestamp = models.DateTimeField(null=True, blank=True)
     
     # Permanent access token - auto-generated, never expires
     token = models.UUIDField(default=uuid.uuid4, null=True, blank=True)
@@ -151,6 +156,7 @@ class Response(models.Model):
     panelist = models.ForeignKey(Panelist, on_delete=models.CASCADE, related_name="responses")
     round_item = models.ForeignKey(RoundItem, on_delete=models.CASCADE, related_name="responses")
     value = models.TextField()
+    comment = models.TextField(blank=True, null=True, help_text="Optional comment from panelist")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
